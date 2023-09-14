@@ -22,11 +22,9 @@ pub struct MediaResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MediaUpload {
     #[prost(string, tag = "1")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(enumeration = "MediaUploadEncoding", tag = "2")]
-    pub encoding: i32,
-    #[prost(string, tag = "3")]
-    pub data: ::prost::alloc::string::String,
+    pub content_type: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "2")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -36,7 +34,7 @@ pub struct CreateMediaRequest {
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "3")]
-    pub data: ::core::option::Option<MediaUpload>,
+    pub file: ::core::option::Option<MediaUpload>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -100,7 +98,7 @@ pub struct UpdateMediaRequest {
     #[prost(string, optional, tag = "2")]
     pub name: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
-    pub data: ::core::option::Option<MediaUpload>,
+    pub file: ::core::option::Option<MediaUpload>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -117,32 +115,61 @@ pub struct DeleteMediaRequest {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DeleteMediaResponse {}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum MediaUploadEncoding {
-    Unspecified = 0,
-    Base64 = 1,
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InitiateMultipartUploadRequest {
+    #[prost(string, tag = "1")]
+    pub media_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub content_type: ::prost::alloc::string::String,
 }
-impl MediaUploadEncoding {
-    /// String value of the enum field names used in the ProtoBuf definition.
-    ///
-    /// The values are not transformed in any way and thus are considered stable
-    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
-    pub fn as_str_name(&self) -> &'static str {
-        match self {
-            MediaUploadEncoding::Unspecified => "MEDIA_UPLOAD_ENCODING_UNSPECIFIED",
-            MediaUploadEncoding::Base64 => "MEDIA_UPLOAD_ENCODING_BASE64",
-        }
-    }
-    /// Creates an enum from field names used in the ProtoBuf definition.
-    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
-        match value {
-            "MEDIA_UPLOAD_ENCODING_UNSPECIFIED" => Some(Self::Unspecified),
-            "MEDIA_UPLOAD_ENCODING_BASE64" => Some(Self::Base64),
-            _ => None,
-        }
-    }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InitiateMultipartUploadResponse {
+    #[prost(string, tag = "1")]
+    pub key: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub upload_id: ::prost::alloc::string::String,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutMultipartChunkRequest {
+    #[prost(string, tag = "1")]
+    pub media_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub upload_id: ::prost::alloc::string::String,
+    #[prost(uint32, tag = "3")]
+    pub part_number: u32,
+    #[prost(bytes = "vec", tag = "4")]
+    pub chunk: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Part {
+    #[prost(uint32, tag = "1")]
+    pub part_number: u32,
+    #[prost(string, tag = "2")]
+    pub etag: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutMultipartChunkResponse {
+    #[prost(message, optional, tag = "1")]
+    pub part: ::core::option::Option<Part>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompleteMultipartUploadRequest {
+    #[prost(string, tag = "1")]
+    pub media_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub upload_id: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "3")]
+    pub parts: ::prost::alloc::vec::Vec<Part>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompleteMultipartUploadResponse {}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum MediaOrderByField {
@@ -238,6 +265,27 @@ pub mod media_service_server {
             request: tonic::Request<super::DeleteMediaRequest>,
         ) -> std::result::Result<
             tonic::Response<super::DeleteMediaResponse>,
+            tonic::Status,
+        >;
+        async fn initiate_multipart_upload(
+            &self,
+            request: tonic::Request<super::InitiateMultipartUploadRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::InitiateMultipartUploadResponse>,
+            tonic::Status,
+        >;
+        async fn put_multipart_chunk(
+            &self,
+            request: tonic::Request<super::PutMultipartChunkRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::PutMultipartChunkResponse>,
+            tonic::Status,
+        >;
+        async fn complete_multipart_upload(
+            &self,
+            request: tonic::Request<super::CompleteMultipartUploadRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::CompleteMultipartUploadResponse>,
             tonic::Status,
         >;
     }
@@ -535,6 +583,157 @@ pub mod media_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = DeleteMediaSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaService/InitiateMultipartUpload" => {
+                    #[allow(non_camel_case_types)]
+                    struct InitiateMultipartUploadSvc<T: MediaService>(pub Arc<T>);
+                    impl<
+                        T: MediaService,
+                    > tonic::server::UnaryService<super::InitiateMultipartUploadRequest>
+                    for InitiateMultipartUploadSvc<T> {
+                        type Response = super::InitiateMultipartUploadResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                super::InitiateMultipartUploadRequest,
+                            >,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaService>::initiate_multipart_upload(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = InitiateMultipartUploadSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaService/PutMultipartChunk" => {
+                    #[allow(non_camel_case_types)]
+                    struct PutMultipartChunkSvc<T: MediaService>(pub Arc<T>);
+                    impl<
+                        T: MediaService,
+                    > tonic::server::UnaryService<super::PutMultipartChunkRequest>
+                    for PutMultipartChunkSvc<T> {
+                        type Response = super::PutMultipartChunkResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::PutMultipartChunkRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaService>::put_multipart_chunk(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = PutMultipartChunkSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaService/CompleteMultipartUpload" => {
+                    #[allow(non_camel_case_types)]
+                    struct CompleteMultipartUploadSvc<T: MediaService>(pub Arc<T>);
+                    impl<
+                        T: MediaService,
+                    > tonic::server::UnaryService<super::CompleteMultipartUploadRequest>
+                    for CompleteMultipartUploadSvc<T> {
+                        type Response = super::CompleteMultipartUploadResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                super::CompleteMultipartUploadRequest,
+                            >,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaService>::complete_multipart_upload(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = CompleteMultipartUploadSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

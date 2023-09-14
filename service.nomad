@@ -74,13 +74,13 @@ JWKS_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_zitadel" }}/oauth/v2/keys'
 
 {{ with nomadVar "nomad/jobs/media" }}
 BUCKET_NAME='{{ .BUCKET_NAME }}'
+BUCKET_ENDPOINT='{{ .BUCKET_ENDPOINT }}'
 FILE_MAX_SIZE='{{ .FILE_MAX_SIZE }}'
 {{ end }}
 
 {{ with secret "kv2/data/services/media" }}
 BUCKET_ACCESS_KEY_ID='{{ .Data.data.BUCKET_ACCESS_KEY_ID }}'
 BUCKET_SECRET_ACCESS_KEY='{{ .Data.data.BUCKET_SECRET_ACCESS_KEY }}'
-BUCKET_ACCOUNT_ID='{{ .Data.data.BUCKET_ACCOUNT_ID }}'
 {{ end }}
 
 COMMERCE_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_commerce-api" }}'

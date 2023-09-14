@@ -71,7 +71,7 @@ impl Media {
         market_booth_id: &Uuid,
         user_id: &String,
         name: &String,
-        data_url: &String,
+        file_path: &String,
     ) -> Result<Self, DbError> {
         let (sql, values) = Query::insert()
             .into_table(MediaIden::Table)
@@ -87,7 +87,7 @@ impl Media {
                 (*market_booth_id).into(),
                 user_id.into(),
                 name.into(),
-                data_url.into(),
+                file_path.into(),
             ])?
             .returning_all()
             .build_postgres(PostgresQueryBuilder);

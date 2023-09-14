@@ -37,10 +37,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // initialize file service
     let file_service = FileService::new(
         get_env_var("BUCKET_NAME"),
-        get_env_var("BUCKET_ACCOUNT_ID"),
+        get_env_var("BUCKET_ENDPOINT"),
         get_env_var("BUCKET_ACCESS_KEY_ID"),
         get_env_var("BUCKET_SECRET_ACCESS_KEY"),
-    );
+    )
+    .await;
 
     let file_max_size = get_env_var("FILE_MAX_SIZE").parse().unwrap();
 
