@@ -122,8 +122,8 @@ impl Media {
         user_id: &String,
         limit: u64,
         offset: u64,
-        filter: Option<(MediaFilterField, String)>,
-        order_by: Option<(MediaOrderByField, Direction)>,
+        _filter: Option<(MediaFilterField, String)>,
+        _order_by: Option<(MediaOrderByField, Direction)>,
     ) -> Result<Vec<Self>, DbError> {
         let client = pool.get().await?;
 
