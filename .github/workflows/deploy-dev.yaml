@@ -49,6 +49,8 @@ jobs:
     runs-on: self-hosted
     needs: [build]
     steps:
+      - uses: actions/checkout@v3
+
       - name: Get Nomad token from Vault
         uses: hashicorp/vault-action@v2
         with:

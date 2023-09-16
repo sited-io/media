@@ -75,7 +75,8 @@ JWKS_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_zitadel" }}/oauth/v2/keys'
 {{ with nomadVar "nomad/jobs/media" }}
 BUCKET_NAME='{{ .BUCKET_NAME }}'
 BUCKET_ENDPOINT='{{ .BUCKET_ENDPOINT }}'
-FILE_MAX_SIZE='{{ .FILE_MAX_SIZE }}'
+MAX_MESSAGE_SIZE_BYTES='{{ .MAX_MESSAGE_SIZE_BYTES }}'
+DEFAULT_USER_QUOTA_MIB='{{ .DEFAULT_USER_QUOTA_MIB }}'
 {{ end }}
 
 {{ with secret "kv2/data/services/media" }}
