@@ -3,7 +3,9 @@ use tonic::{Request, Status};
 
 use crate::api::peoplesmarkets::commerce::v1::market_booth_service_client::MarketBoothServiceClient;
 use crate::api::peoplesmarkets::commerce::v1::offer_service_client::OfferServiceClient;
-use crate::api::peoplesmarkets::commerce::v1::GetMarketBoothRequest;
+use crate::api::peoplesmarkets::commerce::v1::{
+    GetMarketBoothRequest, GetOfferRequest,
+};
 
 pub struct CommerceService {
     market_booth_client: MarketBoothServiceClient<Channel>,
@@ -40,6 +42,30 @@ impl CommerceService {
             Ok(())
         } else {
             Err(Status::not_found("market_booth"))
+        }
+    }
+
+    pub async fn check_offer_and_owner(
+        &self,
+        offer_id: &String,
+        user_id: &String,
+    ) -> Result<(), Status> {
+        let mut client = self.offer_client.clone();
+
+        let offer = client
+            .get_offer(Request::new(GetOfferRequest {
+                offer_id: offer_id.to_owned(),
+            }))
+            .await
+            .map_err(|_| Status::not_found("offer"))?
+            .into_inner()
+            .offer
+            .ok_or_else(|| Status::not_found("offer"))?;
+
+        if offer.user_id == *user_id {
+            Ok(())
+        } else {
+            Err(Status::not_found("offer"))
         }
     }
 }

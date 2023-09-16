@@ -2,7 +2,8 @@ use chrono::{DateTime, Utc};
 use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::{Pool, Transaction};
 use sea_query::{
-    Alias, Asterisk, Expr, Iden, PostgresQueryBuilder, Query, SelectStatement,
+    Alias, Asterisk, Expr, Iden, Order, PostgresQueryBuilder, Query,
+    SelectStatement,
 };
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
@@ -14,7 +15,7 @@ use crate::api::peoplesmarkets::ordering::v1::Direction;
 use crate::db::DbError;
 
 use super::media_offer::MediaOfferIden;
-use super::MediaOfferAsRel;
+use super::MediaOffer;
 
 #[derive(Debug, Clone, Iden)]
 #[iden(rename = "medias")]
@@ -53,7 +54,7 @@ impl Media {
 
         query
             .column((MediaIden::Table, Asterisk))
-            .expr_as(MediaOfferAsRel::get_agg(), Self::get_offer_ids_alias())
+            .expr_as(MediaOffer::get_agg(), Self::get_offer_ids_alias())
             .from(MediaIden::Table)
             .left_join(
                 MediaOfferIden::Table,
@@ -63,6 +64,53 @@ impl Media {
             .group_by_col((MediaIden::Table, MediaIden::MediaId));
 
         query
+    }
+
+    fn add_filter(
+        query: &mut SelectStatement,
+        filter_field: MediaFilterField,
+        filter_query: String,
+    ) {
+        use MediaFilterField::*;
+
+        match filter_field {
+            Unspecified => {}
+            Name => {
+                query.and_where(
+                    Expr::col((MediaIden::Table, MediaIden::Name))
+                        .eq(filter_query),
+                );
+            }
+            OfferId => {
+                let offer_id: Uuid = filter_query.parse().unwrap();
+                query.and_where(
+                    Expr::col((MediaOfferIden::Table, MediaOfferIden::OfferId))
+                        .eq(offer_id),
+                );
+            }
+        }
+    }
+
+    fn add_order_by(
+        query: &mut SelectStatement,
+        order_by_field: MediaOrderByField,
+        order_by_direction: Direction,
+    ) {
+        use MediaOrderByField::*;
+
+        let order = match order_by_direction {
+            Direction::Unspecified | Direction::Asc => Order::Asc,
+            Direction::Desc => Order::Desc,
+        };
+
+        match order_by_field {
+            Unspecified | CreatedAt => {
+                query.order_by((MediaIden::Table, MediaIden::CreatedAt), order);
+            }
+            UpdatedAt => {
+                query.order_by((MediaIden::Table, MediaIden::UpdatedAt), order);
+            }
+        }
     }
 
     pub async fn create<'a>(
@@ -116,14 +164,33 @@ impl Media {
         Ok(row.map(Self::from))
     }
 
+    pub async fn get_for_user(
+        pool: &Pool,
+        media_id: &Uuid,
+        user_id: &String,
+    ) -> Result<Option<Self>, DbError> {
+        let client = pool.get().await?;
+
+        let (sql, values) = Query::select()
+            .column(Asterisk)
+            .from(MediaIden::Table)
+            .and_where(Expr::col(MediaIden::MediaId).eq(*media_id))
+            .and_where(Expr::col(MediaIden::UserId).eq(user_id))
+            .build_postgres(PostgresQueryBuilder);
+
+        let row = client.query_opt(sql.as_str(), &values.as_params()).await?;
+
+        Ok(row.map(Self::from))
+    }
+
     pub async fn list(
         pool: &Pool,
         market_booth_id: &Uuid,
         user_id: &String,
         limit: u64,
         offset: u64,
-        _filter: Option<(MediaFilterField, String)>,
-        _order_by: Option<(MediaOrderByField, Direction)>,
+        filter: Option<(MediaFilterField, String)>,
+        order_by: Option<(MediaOrderByField, Direction)>,
     ) -> Result<Vec<Self>, DbError> {
         let client = pool.get().await?;
 
@@ -138,7 +205,21 @@ impl Media {
                 .and_where(
                     Expr::col((MediaIden::Table, MediaIden::UserId))
                         .eq(user_id),
-                )
+                );
+
+            if let Some((filter_field, filter_query)) = filter {
+                Self::add_filter(&mut query, filter_field, filter_query);
+            }
+
+            if let Some((order_by_field, order_by_direction)) = order_by {
+                Self::add_order_by(
+                    &mut query,
+                    order_by_field,
+                    order_by_direction,
+                );
+            }
+
+            query
                 .limit(limit)
                 .offset(offset)
                 .build_postgres(PostgresQueryBuilder)

@@ -170,6 +170,28 @@ pub struct CompleteMultipartUploadRequest {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CompleteMultipartUploadResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AddMediaToOfferRequest {
+    #[prost(string, tag = "1")]
+    pub media_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub offer_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AddMediaToOfferResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemoveMediaFromOfferRequest {
+    #[prost(string, tag = "1")]
+    pub media_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub offer_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemoveMediaFromOfferResponse {}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum MediaOrderByField {
@@ -204,6 +226,7 @@ impl MediaOrderByField {
 pub enum MediaFilterField {
     Unspecified = 0,
     Name = 1,
+    OfferId = 2,
 }
 impl MediaFilterField {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -214,6 +237,7 @@ impl MediaFilterField {
         match self {
             MediaFilterField::Unspecified => "MEDIA_FILTER_FIELD_UNSPECIFIED",
             MediaFilterField::Name => "MEDIA_FILTER_FIELD_NAME",
+            MediaFilterField::OfferId => "MEDIA_FILTER_FIELD_OFFER_ID",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -221,6 +245,7 @@ impl MediaFilterField {
         match value {
             "MEDIA_FILTER_FIELD_UNSPECIFIED" => Some(Self::Unspecified),
             "MEDIA_FILTER_FIELD_NAME" => Some(Self::Name),
+            "MEDIA_FILTER_FIELD_OFFER_ID" => Some(Self::OfferId),
             _ => None,
         }
     }
@@ -286,6 +311,20 @@ pub mod media_service_server {
             request: tonic::Request<super::CompleteMultipartUploadRequest>,
         ) -> std::result::Result<
             tonic::Response<super::CompleteMultipartUploadResponse>,
+            tonic::Status,
+        >;
+        async fn add_media_to_offer(
+            &self,
+            request: tonic::Request<super::AddMediaToOfferRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::AddMediaToOfferResponse>,
+            tonic::Status,
+        >;
+        async fn remove_media_from_offer(
+            &self,
+            request: tonic::Request<super::RemoveMediaFromOfferRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RemoveMediaFromOfferResponse>,
             tonic::Status,
         >;
     }
@@ -734,6 +773,103 @@ pub mod media_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = CompleteMultipartUploadSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaService/AddMediaToOffer" => {
+                    #[allow(non_camel_case_types)]
+                    struct AddMediaToOfferSvc<T: MediaService>(pub Arc<T>);
+                    impl<
+                        T: MediaService,
+                    > tonic::server::UnaryService<super::AddMediaToOfferRequest>
+                    for AddMediaToOfferSvc<T> {
+                        type Response = super::AddMediaToOfferResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::AddMediaToOfferRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaService>::add_media_to_offer(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = AddMediaToOfferSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaService/RemoveMediaFromOffer" => {
+                    #[allow(non_camel_case_types)]
+                    struct RemoveMediaFromOfferSvc<T: MediaService>(pub Arc<T>);
+                    impl<
+                        T: MediaService,
+                    > tonic::server::UnaryService<super::RemoveMediaFromOfferRequest>
+                    for RemoveMediaFromOfferSvc<T> {
+                        type Response = super::RemoveMediaFromOfferResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::RemoveMediaFromOfferRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaService>::remove_media_from_offer(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = RemoveMediaFromOfferSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

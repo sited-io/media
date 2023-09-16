@@ -515,17 +515,25 @@ pub mod market_booth_service_client {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Recurring {
+    #[prost(enumeration = "RecurringInterval", tag = "1")]
+    pub interval: i32,
+    #[prost(uint32, tag = "2")]
+    pub interval_count: u32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Price {
-    #[prost(string, tag = "1")]
-    pub price_id: ::prost::alloc::string::String,
-    #[prost(enumeration = "Currency", tag = "2")]
+    #[prost(enumeration = "Currency", tag = "1")]
     pub currency: i32,
-    #[prost(enumeration = "PriceType", tag = "3")]
+    #[prost(enumeration = "PriceType", tag = "2")]
     pub price_type: i32,
-    #[prost(enumeration = "PriceBillingScheme", tag = "4")]
+    #[prost(enumeration = "PriceBillingScheme", tag = "3")]
     pub billing_scheme: i32,
-    #[prost(uint32, tag = "5")]
-    pub unit_amont: u32,
+    #[prost(uint32, tag = "4")]
+    pub unit_amount: u32,
+    #[prost(message, optional, tag = "5")]
+    pub recurring: ::core::option::Option<Recurring>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -558,6 +566,7 @@ impl Currency {
 pub enum PriceType {
     Unspecified = 0,
     OneTime = 1,
+    Recurring = 2,
 }
 impl PriceType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -568,6 +577,7 @@ impl PriceType {
         match self {
             PriceType::Unspecified => "PRICE_TYPE_UNSPECIFIED",
             PriceType::OneTime => "PRICE_TYPE_ONE_TIME",
+            PriceType::Recurring => "PRICE_TYPE_RECURRING",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -575,6 +585,7 @@ impl PriceType {
         match value {
             "PRICE_TYPE_UNSPECIFIED" => Some(Self::Unspecified),
             "PRICE_TYPE_ONE_TIME" => Some(Self::OneTime),
+            "PRICE_TYPE_RECURRING" => Some(Self::Recurring),
             _ => None,
         }
     }
@@ -605,6 +616,41 @@ impl PriceBillingScheme {
         }
     }
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum RecurringInterval {
+    Unspecified = 0,
+    Day = 1,
+    Week = 2,
+    Month = 3,
+    Year = 4,
+}
+impl RecurringInterval {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            RecurringInterval::Unspecified => "RECURRING_INTERVAL_UNSPECIFIED",
+            RecurringInterval::Day => "RECURRING_INTERVAL_DAY",
+            RecurringInterval::Week => "RECURRING_INTERVAL_WEEK",
+            RecurringInterval::Month => "RECURRING_INTERVAL_MONTH",
+            RecurringInterval::Year => "RECURRING_INTERVAL_YEAR",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "RECURRING_INTERVAL_UNSPECIFIED" => Some(Self::Unspecified),
+            "RECURRING_INTERVAL_DAY" => Some(Self::Day),
+            "RECURRING_INTERVAL_WEEK" => Some(Self::Week),
+            "RECURRING_INTERVAL_MONTH" => Some(Self::Month),
+            "RECURRING_INTERVAL_YEAR" => Some(Self::Year),
+            _ => None,
+        }
+    }
+}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct OfferResponse {
@@ -613,21 +659,25 @@ pub struct OfferResponse {
     #[prost(string, tag = "2")]
     pub market_booth_id: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
-    pub user_id: ::prost::alloc::string::String,
-    #[prost(int64, tag = "4")]
-    pub created_at: i64,
-    #[prost(int64, tag = "5")]
-    pub updated_at: i64,
-    #[prost(string, tag = "6")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(string, tag = "7")]
-    pub description: ::prost::alloc::string::String,
-    #[prost(message, repeated, tag = "8")]
-    pub images: ::prost::alloc::vec::Vec<OfferImageResponse>,
-    #[prost(message, optional, tag = "9")]
-    pub price: ::core::option::Option<Price>,
-    #[prost(string, tag = "10")]
     pub market_booth_name: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub user_id: ::prost::alloc::string::String,
+    #[prost(int64, tag = "5")]
+    pub created_at: i64,
+    #[prost(int64, tag = "6")]
+    pub updated_at: i64,
+    #[prost(string, tag = "7")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub description: ::prost::alloc::string::String,
+    #[prost(bool, tag = "9")]
+    pub is_active: bool,
+    #[prost(message, repeated, tag = "10")]
+    pub images: ::prost::alloc::vec::Vec<OfferImageResponse>,
+    #[prost(message, optional, tag = "11")]
+    pub price: ::core::option::Option<Price>,
+    #[prost(enumeration = "OfferType", tag = "12")]
+    pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -648,8 +698,8 @@ pub struct CreateOfferRequest {
     pub name: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "3")]
     pub description: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(message, optional, tag = "4")]
-    pub price: ::core::option::Option<Price>,
+    #[prost(enumeration = "OfferType", tag = "4")]
+    pub r#type: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -716,8 +766,10 @@ pub struct UpdateOfferRequest {
     pub name: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "3")]
     pub description: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(message, optional, tag = "4")]
-    pub price: ::core::option::Option<Price>,
+    #[prost(bool, optional, tag = "4")]
+    pub is_active: ::core::option::Option<bool>,
+    #[prost(enumeration = "OfferType", optional, tag = "5")]
+    pub r#type: ::core::option::Option<i32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -756,6 +808,58 @@ pub struct RemoveImageFromOfferRequest {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RemoveImageFromOfferResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutPriceToOfferRequest {
+    #[prost(string, tag = "1")]
+    pub offer_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub price: ::core::option::Option<Price>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutPriceToOfferResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemovePriceFromOfferRequest {
+    #[prost(string, tag = "1")]
+    pub offer_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemovePriceFromOfferResponse {}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum OfferType {
+    Unspecified = 0,
+    Physical = 1,
+    Digital = 2,
+    Service = 3,
+}
+impl OfferType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            OfferType::Unspecified => "OFFER_TYPE_UNSPECIFIED",
+            OfferType::Physical => "OFFER_TYPE_PHYSICAL",
+            OfferType::Digital => "OFFER_TYPE_DIGITAL",
+            OfferType::Service => "OFFER_TYPE_SERVICE",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "OFFER_TYPE_UNSPECIFIED" => Some(Self::Unspecified),
+            "OFFER_TYPE_PHYSICAL" => Some(Self::Physical),
+            "OFFER_TYPE_DIGITAL" => Some(Self::Digital),
+            "OFFER_TYPE_SERVICE" => Some(Self::Service),
+            _ => None,
+        }
+    }
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum OffersOrderByField {
@@ -798,6 +902,7 @@ pub enum OffersFilterField {
     Name = 1,
     Description = 2,
     NameAndDescription = 3,
+    Type = 4,
 }
 impl OffersFilterField {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -812,6 +917,7 @@ impl OffersFilterField {
             OffersFilterField::NameAndDescription => {
                 "OFFERS_FILTER_FIELD_NAME_AND_DESCRIPTION"
             }
+            OffersFilterField::Type => "OFFERS_FILTER_FIELD_TYPE",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -821,6 +927,7 @@ impl OffersFilterField {
             "OFFERS_FILTER_FIELD_NAME" => Some(Self::Name),
             "OFFERS_FILTER_FIELD_DESCRIPTION" => Some(Self::Description),
             "OFFERS_FILTER_FIELD_NAME_AND_DESCRIPTION" => Some(Self::NameAndDescription),
+            "OFFERS_FILTER_FIELD_TYPE" => Some(Self::Type),
             _ => None,
         }
     }
@@ -1116,6 +1223,66 @@ pub mod offer_service_client {
                     GrpcMethod::new(
                         "peoplesmarkets.commerce.v1.OfferService",
                         "RemoveImageFromOffer",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn put_price_to_offer(
+            &mut self,
+            request: impl tonic::IntoRequest<super::PutPriceToOfferRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::PutPriceToOfferResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.OfferService/PutPriceToOffer",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.OfferService",
+                        "PutPriceToOffer",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn remove_price_from_offer(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RemovePriceFromOfferRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RemovePriceFromOfferResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.OfferService/RemovePriceFromOffer",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.OfferService",
+                        "RemovePriceFromOffer",
                     ),
                 );
             self.inner.unary(req, path, codec).await

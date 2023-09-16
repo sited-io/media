@@ -8,18 +8,20 @@ use crate::api::peoplesmarkets::media::v1::media_service_server::{
     self, MediaServiceServer,
 };
 use crate::api::peoplesmarkets::media::v1::{
+    AddMediaToOfferRequest, AddMediaToOfferResponse,
     CompleteMultipartUploadRequest, CompleteMultipartUploadResponse,
     CreateMediaRequest, CreateMediaResponse, DeleteMediaRequest,
     DeleteMediaResponse, GetMediaRequest, GetMediaResponse,
     InitiateMultipartUploadRequest, InitiateMultipartUploadResponse,
     ListMediaRequest, ListMediaResponse, MediaResponse, Part,
-    PutMultipartChunkRequest, PutMultipartChunkResponse, UpdateMediaRequest,
-    UpdateMediaResponse,
+    PutMultipartChunkRequest, PutMultipartChunkResponse,
+    RemoveMediaFromOfferRequest, RemoveMediaFromOfferResponse,
+    UpdateMediaRequest, UpdateMediaResponse,
 };
 use crate::auth::get_user_id;
 use crate::db::DbError;
 use crate::files::FileService;
-use crate::model::Media;
+use crate::model::{Media, MediaOffer};
 use crate::CommerceService;
 
 use super::{paginate, parse_uuid};
@@ -191,14 +193,18 @@ impl media_service_server::MediaService for MediaService {
 
         let (limit, offset, pagination) = paginate(pagination)?;
 
+        let filter = filter.map(|f| (f.field(), f.query));
+
+        let order_by = order_by.map(|o| (o.field(), o.direction()));
+
         let found_medias = Media::list(
             &self.pool,
             &market_booth_id,
             &user_id,
             limit,
             offset,
-            None,
-            None,
+            filter,
+            order_by,
         )
         .await?;
 
@@ -373,5 +379,48 @@ impl media_service_server::MediaService for MediaService {
             .await?;
 
         Ok(Response::new(CompleteMultipartUploadResponse {}))
+    }
+
+    async fn add_media_to_offer(
+        &self,
+        request: Request<AddMediaToOfferRequest>,
+    ) -> Result<Response<AddMediaToOfferResponse>, Status> {
+        let user_id = get_user_id(request.metadata(), &self.verifier).await?;
+
+        let AddMediaToOfferRequest { media_id, offer_id } =
+            request.into_inner();
+
+        let media_id = parse_uuid(&media_id, "media_id")?;
+        let offer_uuid = parse_uuid(&offer_id, "media_id")?;
+
+        self.commerce_service
+            .check_offer_and_owner(&offer_id, &user_id)
+            .await?;
+
+        Media::get_for_user(&self.pool, &media_id, &user_id)
+            .await?
+            .ok_or(Status::not_found("media"))?;
+
+        MediaOffer::create(&self.pool, &media_id, &offer_uuid, &user_id)
+            .await?;
+
+        Ok(Response::new(AddMediaToOfferResponse {}))
+    }
+
+    async fn remove_media_from_offer(
+        &self,
+        request: Request<RemoveMediaFromOfferRequest>,
+    ) -> Result<Response<RemoveMediaFromOfferResponse>, Status> {
+        let user_id = get_user_id(request.metadata(), &self.verifier).await?;
+
+        let RemoveMediaFromOfferRequest { media_id, offer_id } =
+            request.into_inner();
+
+        let media_id = parse_uuid(&media_id, "media_id")?;
+        let offer_id = parse_uuid(&offer_id, "offer_id")?;
+
+        MediaOffer::delete(&self.pool, &media_id, &offer_id, &user_id).await?;
+
+        Ok(Response::new(RemoveMediaFromOfferResponse {}))
     }
 }
