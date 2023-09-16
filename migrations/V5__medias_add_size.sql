@@ -1,0 +1,4 @@
+ALTER TABLE
+  medias
+ADD
+  COLUMN size_bytes INTEGER NOT NULL DEFAULT 0;

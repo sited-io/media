@@ -5,9 +5,11 @@ pub mod db;
 pub mod files;
 pub mod logging;
 mod model;
+mod quota;
 mod services;
 
 pub use commerce::CommerceService;
+pub use quota::QuotaService;
 pub use services::*;
 
 pub fn get_env_var(var: &str) -> String {

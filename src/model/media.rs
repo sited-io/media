@@ -28,6 +28,7 @@ pub enum MediaIden {
     UpdatedAt,
     Name,
     DataUrl,
+    SizeBytes,
 }
 
 #[derive(Debug, Clone)]
@@ -40,6 +41,7 @@ pub struct Media {
     pub updated_at: DateTime<Utc>,
     pub name: String,
     pub data_url: String,
+    pub size_bytes: u64,
 }
 
 impl Media {
@@ -120,6 +122,7 @@ impl Media {
         user_id: &String,
         name: &String,
         file_path: &String,
+        size_bytes: i64,
     ) -> Result<Self, DbError> {
         let (sql, values) = Query::insert()
             .into_table(MediaIden::Table)
@@ -129,6 +132,7 @@ impl Media {
                 MediaIden::UserId,
                 MediaIden::Name,
                 MediaIden::DataUrl,
+                MediaIden::SizeBytes,
             ])
             .values([
                 (*media_id).into(),
@@ -136,6 +140,7 @@ impl Media {
                 user_id.into(),
                 name.into(),
                 file_path.into(),
+                size_bytes.into(),
             ])?
             .returning_all()
             .build_postgres(PostgresQueryBuilder);
@@ -230,11 +235,29 @@ impl Media {
         Ok(rows.iter().map(Self::from).collect())
     }
 
+    pub async fn list_all_for_user(
+        pool: &Pool,
+        user_id: &String,
+    ) -> Result<Vec<Self>, DbError> {
+        let client = pool.get().await?;
+
+        let (sql, values) = Query::select()
+            .column(Asterisk)
+            .from(MediaIden::Table)
+            .and_where(Expr::col(MediaIden::UserId).eq(user_id))
+            .build_postgres(PostgresQueryBuilder);
+
+        let rows = client.query(sql.as_str(), &values.as_params()).await?;
+
+        Ok(rows.iter().map(Self::from).collect())
+    }
+
     pub async fn update(
         pool: &Pool,
         media_id: &Uuid,
         user_id: &String,
         name: Option<String>,
+        size_bytes: Option<i64>,
     ) -> Result<Self, DbError> {
         let client = pool.get().await?;
 
@@ -246,12 +269,40 @@ impl Media {
                 query.value(MediaIden::Name, name);
             }
 
+            if let Some(size_bytes) = size_bytes {
+                query.value(MediaIden::SizeBytes, size_bytes);
+            }
+
             query
                 .and_where(Expr::col(MediaIden::MediaId).eq(*media_id))
                 .and_where(Expr::col(MediaIden::UserId).eq(user_id))
                 .returning_all()
                 .build_postgres(PostgresQueryBuilder)
         };
+
+        let row = client.query_one(sql.as_str(), &values.as_params()).await?;
+
+        Ok(Self::from(row))
+    }
+
+    pub async fn add_size(
+        pool: &Pool,
+        media_id: &Uuid,
+        user_id: &String,
+        additional_size: i64,
+    ) -> Result<Self, DbError> {
+        let client = pool.get().await?;
+
+        let (sql, values) = Query::update()
+            .table(MediaIden::Table)
+            .value(
+                MediaIden::SizeBytes,
+                Expr::cust_with_values("size_bytes + $1", [additional_size]),
+            )
+            .and_where(Expr::col(MediaIden::MediaId).eq(*media_id))
+            .and_where(Expr::col(MediaIden::UserId).eq(user_id))
+            .returning_all()
+            .build_postgres(PostgresQueryBuilder);
 
         let row = client.query_one(sql.as_str(), &values.as_params()).await?;
 
@@ -289,6 +340,10 @@ impl From<&Row> for Media {
             updated_at: row.get(MediaIden::UpdatedAt.to_string().as_str()),
             name: row.get(MediaIden::Name.to_string().as_str()),
             data_url: row.get(MediaIden::DataUrl.to_string().as_str()),
+            size_bytes: u64::try_from(
+                row.get::<&str, i64>(MediaIden::SizeBytes.to_string().as_str()),
+            )
+            .expect("should fit"),
         }
     }
 }

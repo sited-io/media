@@ -11,7 +11,7 @@ use media::api::peoplesmarkets::media::v1::media_service_server::MediaServiceSer
 use media::db::{init_db_pool, migrate};
 use media::files::FileService;
 use media::logging::{LogOnFailure, LogOnRequest, LogOnResponse};
-use media::{get_env_var, CommerceService, MediaService};
+use media::{get_env_var, CommerceService, MediaService, QuotaService};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -43,11 +43,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     )
     .await;
 
-    let file_max_size = get_env_var("FILE_MAX_SIZE").parse().unwrap();
+    let max_message_size_bytes =
+        get_env_var("MAX_MESSAGE_SIZE_BYTES").parse().unwrap();
 
     // initialize commerce service client
     let commerce_service =
         CommerceService::init(get_env_var("COMMERCE_SERVICE_URL")).await?;
+
+    // initialize quota service
+    let quota_service = QuotaService::new(
+        db_pool.clone(),
+        get_env_var("DEFAULT_USER_QUOTA_MIB").parse().unwrap(),
+    );
 
     // initialize client for JWT verification against public JWKS
     //   adding host header in order to work in private network
@@ -87,7 +94,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         file_service,
         commerce_service,
-        file_max_size,
+        quota_service,
+        max_message_size_bytes,
     );
 
     tracing::log::info!("gRPC+web server listening on {}", host);
