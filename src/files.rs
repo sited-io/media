@@ -146,6 +146,28 @@ impl FileService {
         Ok(())
     }
 
+    pub async fn abort_multipart_upload(
+        &self,
+        file_path: &String,
+        upload_id: &String,
+    ) -> Result<(), Status> {
+        self.client
+            .abort_multipart_upload()
+            .bucket(&self.bucket_name)
+            .key(file_path)
+            .upload_id(upload_id)
+            .send()
+            .await
+            .map_err(|err| {
+                tracing::log::error!(
+                    "[FileService.abort_multipart_upload]: {err}"
+                );
+                Status::internal("")
+            })?;
+
+        Ok(())
+    }
+
     pub async fn get_file(
         &self,
         file_path: &String,

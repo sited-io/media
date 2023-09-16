@@ -22,7 +22,7 @@ use crate::auth::get_user_id;
 use crate::db::DbError;
 use crate::files::FileService;
 use crate::model::{Media, MediaOffer};
-use crate::CommerceService;
+use crate::{CommerceService, QuotaService};
 
 use super::{paginate, parse_uuid};
 
@@ -31,6 +31,7 @@ pub struct MediaService {
     verifier: RemoteJwksVerifier,
     file_service: FileService,
     commerce_service: CommerceService,
+    quota_service: QuotaService,
 }
 
 impl MediaService {
@@ -39,12 +40,14 @@ impl MediaService {
         verifier: RemoteJwksVerifier,
         file_service: FileService,
         commerce_service: CommerceService,
+        quota_service: QuotaService,
     ) -> Self {
         Self {
             pool,
             verifier,
             file_service,
             commerce_service,
+            quota_service,
         }
     }
 
@@ -53,16 +56,18 @@ impl MediaService {
         verifier: RemoteJwksVerifier,
         file_service: FileService,
         commerce_service: CommerceService,
-        max_size: usize,
+        quota_service: QuotaService,
+        max_message_size_bytes: usize,
     ) -> MediaServiceServer<Self> {
         MediaServiceServer::new(Self::new(
             pool,
             verifier,
             file_service,
             commerce_service,
+            quota_service,
         ))
-        .max_decoding_message_size(max_size)
-        .max_encoding_message_size(max_size)
+        .max_decoding_message_size(max_message_size_bytes)
+        .max_encoding_message_size(max_message_size_bytes)
     }
 
     fn to_response(
@@ -111,6 +116,8 @@ impl media_service_server::MediaService for MediaService {
         let market_booth_uuid =
             parse_uuid(&market_booth_id, "market_booth_id")?;
 
+        self.quota_service.check_quota(&user_id).await?;
+
         self.commerce_service
             .check_market_booth_and_owner(&market_booth_id, &user_id)
             .await?;
@@ -123,6 +130,13 @@ impl media_service_server::MediaService for MediaService {
         let mut conn = self.pool.get().await.map_err(DbError::from)?;
         let transaction = conn.transaction().await.map_err(DbError::from)?;
 
+        let size = file
+            .as_ref()
+            .map(|f| f.data.len())
+            .unwrap_or(0)
+            .try_into()
+            .map_err(|_| Status::internal(""))?;
+
         let created_media = Media::create(
             &transaction,
             &media_id,
@@ -130,6 +144,7 @@ impl media_service_server::MediaService for MediaService {
             &user_id,
             &name,
             &file_path,
+            size,
         )
         .await?;
 
@@ -235,8 +250,12 @@ impl media_service_server::MediaService for MediaService {
             .await?
             .ok_or(Status::not_found(&media_id))?;
 
+        let new_size =
+            file.as_ref().and_then(|f| i64::try_from(f.data.len()).ok());
+
         let updated_media =
-            Media::update(&self.pool, &media_uuid, &user_id, name).await?;
+            Media::update(&self.pool, &media_uuid, &user_id, name, new_size)
+                .await?;
 
         if let Some(file) = file {
             self.file_service
@@ -285,6 +304,8 @@ impl media_service_server::MediaService for MediaService {
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
 
+        self.quota_service.check_quota(&user_id).await?;
+
         let found_media = Media::get(&self.pool, &media_uuid)
             .await?
             .ok_or(Status::not_found(&media_id))?;
@@ -319,12 +340,23 @@ impl media_service_server::MediaService for MediaService {
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
 
-        let found_media = Media::get(&self.pool, &media_uuid)
-            .await?
-            .ok_or(Status::not_found(&media_id))?;
+        let additional_size =
+            i64::try_from(chunk.len()).map_err(|_| Status::internal(""))?;
 
-        if found_media.user_id != user_id {
-            return Err(Status::not_found(&media_id));
+        // user_id check is done implicitly in add_size
+        let found_media =
+            Media::add_size(&self.pool, &media_uuid, &user_id, additional_size)
+                .await?;
+
+        if self.quota_service.check_quota(&user_id).await.is_err() {
+            Media::update(&self.pool, &media_uuid, &user_id, None, Some(0))
+                .await?;
+
+            self.file_service
+                .abort_multipart_upload(&found_media.data_url, &upload_id)
+                .await?;
+
+            return Err(Status::aborted("quota reached"));
         }
 
         let etag = self
