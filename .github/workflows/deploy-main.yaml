@@ -50,8 +50,6 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "recursive"
 
       - name: Get Nomad token from Vault
         uses: hashicorp/vault-action@v2
