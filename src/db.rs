@@ -80,22 +80,26 @@ impl From<DbError> for Status {
                             Status::failed_precondition(err.message())
                         }
                         _ => {
-                            todo!("{err:?}")
+                            tracing::log::error!("{tp_err:?}");
+                            Status::internal("")
                         }
                     }
                 } else {
-                    tracing::log::error!("{:?}", tp_err);
+                    tracing::log::error!("{tp_err:?}");
                     Status::internal("")
                 }
             }
             DbError::Pool(pool_err) => {
-                todo!("{pool_err:?}");
+                tracing::log::error!("{pool_err:?}");
+                Status::internal("")
             }
             DbError::CreatePool(create_pool_err) => {
-                todo!("{create_pool_err:?}");
+                tracing::log::error!("{create_pool_err:?}");
+                Status::internal("")
             }
             DbError::SeaQuery(sea_query_err) => {
-                todo!("{sea_query_err:?}");
+                tracing::log::error!("{sea_query_err:?}");
+                Status::internal("")
             }
         }
     }
