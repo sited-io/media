@@ -14,14 +14,14 @@ struct ExtraClaims {
 }
 
 pub fn init_jwks_verifier(
-    jwks_host: &String,
+    jwks_host: &str,
     jwks_url: &String,
 ) -> Result<RemoteJwksVerifier, Box<dyn std::error::Error>> {
     //   adding host header in order to work in private network
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(
         reqwest::header::HOST,
-        reqwest::header::HeaderValue::from_str(&jwks_host)?,
+        reqwest::header::HeaderValue::from_str(jwks_host)?,
     );
     let client = reqwest::Client::builder()
         .default_headers(headers)

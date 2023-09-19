@@ -15,7 +15,8 @@ use crate::api::peoplesmarkets::ordering::v1::Direction;
 use crate::db::DbError;
 
 use super::media_offer::MediaOfferIden;
-use super::MediaOffer;
+use super::media_subscription::MediaSubscriptionIden;
+use super::{MediaOffer, MediaSubscription};
 
 #[derive(Debug, Clone, Iden)]
 #[iden(rename = "medias")]
@@ -260,7 +261,63 @@ impl Media {
         filter: Option<(MediaFilterField, String)>,
         order_by: Option<(MediaOrderByField, Direction)>,
     ) -> Result<Vec<Self>, DbError> {
-        todo!()
+        let conn = pool.get().await?;
+
+        let (sql, values) = {
+            let mut query = Self::select_with_relations();
+
+            query.left_join(
+                MediaSubscriptionIden::Table,
+                Expr::col((MediaOfferIden::Table, MediaOfferIden::OfferId))
+                    .equals((
+                        MediaSubscriptionIden::Table,
+                        MediaSubscriptionIden::OfferId,
+                    )),
+            );
+
+            query.and_where(
+                Expr::col((
+                    MediaSubscriptionIden::Table,
+                    MediaSubscriptionIden::BuyerUserId,
+                ))
+                .eq(user_id),
+            );
+            query.and_where(
+                Expr::col((
+                    MediaSubscriptionIden::Table,
+                    MediaSubscriptionIden::SubscriptionStatus,
+                ))
+                .eq(MediaSubscription::ACTIVE_KEY),
+            );
+            query.and_where(
+                Expr::col((
+                    MediaSubscriptionIden::Table,
+                    MediaSubscriptionIden::PayedUntil,
+                ))
+                .gte(Utc::now()),
+            );
+
+            if let Some((filter_field, filter_query)) = filter {
+                Self::add_filter(&mut query, filter_field, filter_query);
+            }
+
+            if let Some((order_by_field, order_by_direction)) = order_by {
+                Self::add_order_by(
+                    &mut query,
+                    order_by_field,
+                    order_by_direction,
+                );
+            }
+
+            query
+                .limit(limit)
+                .offset(offset)
+                .build_postgres(PostgresQueryBuilder)
+        };
+
+        let rows = conn.query(sql.as_str(), &values.as_params()).await?;
+
+        Ok(rows.iter().map(Self::from).collect())
     }
 
     pub async fn update(
