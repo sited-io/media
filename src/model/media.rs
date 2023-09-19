@@ -252,6 +252,17 @@ impl Media {
         Ok(rows.iter().map(Self::from).collect())
     }
 
+    pub async fn list_accessible(
+        pool: &Pool,
+        user_id: &String,
+        limit: u64,
+        offset: u64,
+        filter: Option<(MediaFilterField, String)>,
+        order_by: Option<(MediaOrderByField, Direction)>,
+    ) -> Result<Vec<Self>, DbError> {
+        todo!()
+    }
+
     pub async fn update(
         pool: &Pool,
         media_id: &Uuid,
