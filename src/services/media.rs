@@ -13,10 +13,10 @@ use crate::api::peoplesmarkets::media::v1::{
     CreateMediaRequest, CreateMediaResponse, DeleteMediaRequest,
     DeleteMediaResponse, GetMediaRequest, GetMediaResponse,
     InitiateMultipartUploadRequest, InitiateMultipartUploadResponse,
-    ListMediaRequest, ListMediaResponse, MediaResponse, Part,
-    PutMultipartChunkRequest, PutMultipartChunkResponse,
-    RemoveMediaFromOfferRequest, RemoveMediaFromOfferResponse,
-    UpdateMediaRequest, UpdateMediaResponse,
+    ListAccessibleMediaRequest, ListAccessibleMediaResponse, ListMediaRequest,
+    ListMediaResponse, MediaResponse, Part, PutMultipartChunkRequest,
+    PutMultipartChunkResponse, RemoveMediaFromOfferRequest,
+    RemoveMediaFromOfferResponse, UpdateMediaRequest, UpdateMediaResponse,
 };
 use crate::auth::get_user_id;
 use crate::db::DbError;
@@ -224,6 +224,47 @@ impl media_service_server::MediaService for MediaService {
         .await?;
 
         Ok(Response::new(ListMediaResponse {
+            medias: found_medias
+                .into_iter()
+                .map(|m| self.to_response(m, None))
+                .collect(),
+            pagination: Some(pagination),
+        }))
+    }
+
+    async fn list_accessible_media(
+        &self,
+        request: Request<ListAccessibleMediaRequest>,
+    ) -> Result<Response<ListAccessibleMediaResponse>, Status> {
+        let user_id = get_user_id(request.metadata(), &self.verifier).await;
+
+        let ListAccessibleMediaRequest {
+            pagination,
+            order_by,
+            filter,
+        } = request.into_inner();
+
+        let user_id = if let Ok(user_id) = user_id {
+            user_id
+        } else {
+            return Ok(Response::new(ListAccessibleMediaResponse {
+                medias: Vec::new(),
+                pagination,
+            }));
+        };
+
+        let (limit, offset, pagination) = paginate(pagination)?;
+
+        let filter = filter.map(|f| (f.field(), f.query));
+
+        let order_by = order_by.map(|o| (o.field(), o.direction()));
+
+        let found_medias = Media::list_accessible(
+            &self.pool, &user_id, limit, offset, filter, order_by,
+        )
+        .await?;
+
+        Ok(Response::new(ListAccessibleMediaResponse {
             medias: found_medias
                 .into_iter()
                 .map(|m| self.to_response(m, None))

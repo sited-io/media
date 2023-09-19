@@ -1,8 +1,5 @@
-use std::time::Duration;
-
 use http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use http::{HeaderName, Method};
-use jwtk::jwk::RemoteJwksVerifier;
 use tonic::transport::Server;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tower_http::trace::TraceLayer;
@@ -11,7 +8,10 @@ use media::api::peoplesmarkets::media::v1::media_service_server::MediaServiceSer
 use media::db::{init_db_pool, migrate};
 use media::files::FileService;
 use media::logging::{LogOnFailure, LogOnRequest, LogOnResponse};
-use media::{get_env_var, CommerceService, MediaService, QuotaService};
+use media::{
+    get_env_var, init_jwks_verifier, CommerceService, MediaService,
+    MediaSubscriptionService, QuotaService,
+};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,17 +56,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get_env_var("DEFAULT_USER_QUOTA_MIB").parse().unwrap(),
     );
 
-    // initialize client for JWT verification against public JWKS
-    //   adding host header in order to work in private network
-    let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert(
-        reqwest::header::HOST,
-        reqwest::header::HeaderValue::from_str(&jwks_host)?,
-    );
-    let client = reqwest::Client::builder()
-        .default_headers(headers)
-        .build()?;
-
     // configure gRPC health reporter
     let (mut health_reporter, health_service) =
         tonic_health::server::health_reporter();
@@ -86,16 +75,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     let media_service = MediaService::build(
-        db_pool,
-        RemoteJwksVerifier::new(
-            jwks_url,
-            Some(client),
-            Duration::from_secs(120),
-        ),
+        db_pool.clone(),
+        init_jwks_verifier(&jwks_host, &jwks_url)?,
         file_service,
         commerce_service,
         quota_service,
         max_message_size_bytes,
+    );
+
+    let media_subscription_service = MediaSubscriptionService::build(
+        db_pool,
+        init_jwks_verifier(&jwks_host, &jwks_url)?,
     );
 
     tracing::log::info!("gRPC+web server listening on {}", host);
@@ -125,6 +115,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_service(tonic_web::enable(reflection_service))
         .add_service(tonic_web::enable(health_service))
         .add_service(tonic_web::enable(media_service))
+        .add_service(tonic_web::enable(media_subscription_service))
         .serve(host.parse().unwrap())
         .await?;
 

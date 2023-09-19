@@ -1,8 +1,10 @@
 use std::io::Result;
 
 fn main() -> Result<()> {
-    const MEDIA_PROTOS: &[&str] =
-        &["service-apis/proto/peoplesmarkets/media/v1/media.proto"];
+    const MEDIA_PROTOS: &[&str] = &[
+        "service-apis/proto/peoplesmarkets/media/v1/media.proto",
+        "service-apis/proto/peoplesmarkets/media/v1/media_subscription.proto",
+    ];
 
     const COMMERCE_PROTOS: &[&str] = &[
         "service-apis/proto/peoplesmarkets/commerce/v1/market_booth.proto",

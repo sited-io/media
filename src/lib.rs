@@ -8,6 +8,7 @@ mod model;
 mod quota;
 mod services;
 
+pub use auth::init_jwks_verifier;
 pub use commerce::CommerceService;
 pub use quota::QuotaService;
 pub use services::*;
