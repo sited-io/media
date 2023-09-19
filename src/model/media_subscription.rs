@@ -18,6 +18,7 @@ pub enum MediaSubscriptionIden {
     CurrentPeriodEnd,
     SubscriptionStatus,
     PayedAt,
+    PayedUntil,
     CreatedAt,
     UpdatedAt,
 }
@@ -31,12 +32,15 @@ pub struct MediaSubscription {
     pub current_period_end: DateTime<Utc>,
     pub subscription_status: String,
     pub payed_at: DateTime<Utc>,
+    pub payed_until: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 impl MediaSubscription {
-    const PUT_COLUMNS: [MediaSubscriptionIden; 7] = [
+    pub const ACTIVE_KEY: &'static str = "active";
+
+    const PUT_COLUMNS: [MediaSubscriptionIden; 8] = [
         MediaSubscriptionIden::MediaSubscriptionId,
         MediaSubscriptionIden::BuyerUserId,
         MediaSubscriptionIden::OfferId,
@@ -44,6 +48,7 @@ impl MediaSubscription {
         MediaSubscriptionIden::CurrentPeriodEnd,
         MediaSubscriptionIden::SubscriptionStatus,
         MediaSubscriptionIden::PayedAt,
+        MediaSubscriptionIden::PayedUntil,
     ];
 
     pub async fn put(
@@ -55,6 +60,7 @@ impl MediaSubscription {
         current_period_end: &DateTime<Utc>,
         subscription_status: &String,
         payed_at: &DateTime<Utc>,
+        payed_until: &DateTime<Utc>,
     ) -> Result<Self, DbError> {
         let conn = pool.get().await?;
 
@@ -69,6 +75,7 @@ impl MediaSubscription {
                 (*current_period_end).into(),
                 subscription_status.into(),
                 (*payed_at).into(),
+                (*payed_until).into(),
             ])?
             .on_conflict(
                 OnConflict::column(MediaSubscriptionIden::MediaSubscriptionId)
@@ -113,6 +120,8 @@ impl From<Row> for MediaSubscription {
             ),
             payed_at: row
                 .get(MediaSubscriptionIden::PayedAt.to_string().as_str()),
+            payed_until: row
+                .get(MediaSubscriptionIden::PayedUntil.to_string().as_str()),
             created_at: row
                 .get(MediaSubscriptionIden::CreatedAt.to_string().as_str()),
             updated_at: row

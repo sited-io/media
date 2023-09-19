@@ -55,6 +55,7 @@ impl media_subscription_service_server::MediaSubscriptionService
             current_period_end,
             subscription_status,
             payed_at,
+            payed_until,
         } = request.into_inner();
 
         MediaSubscription::put(
@@ -66,6 +67,7 @@ impl media_subscription_service_server::MediaSubscriptionService
             &Self::timestamp_to_datetime(current_period_end)?,
             &subscription_status,
             &Self::timestamp_to_datetime(payed_at)?,
+            &Self::timestamp_to_datetime(payed_until)?,
         )
         .await?;
 

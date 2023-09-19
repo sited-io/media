@@ -1,0 +1,4 @@
+ALTER TABLE
+  media_subscriptions
+ADD
+  COLUMN payed_until TIMESTAMP WITH TIME ZONE NOT NULL;
