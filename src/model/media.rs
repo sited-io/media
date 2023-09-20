@@ -52,10 +52,8 @@ impl Media {
         Alias::new(Self::OFFER_IDS_ALIAS)
     }
 
-    fn select_with_relations() -> SelectStatement {
-        let mut query = Query::select();
-
-        query
+    fn select_with_offer_ids() -> SelectStatement {
+        Query::select()
             .column((MediaIden::Table, Asterisk))
             .expr_as(MediaOffer::get_agg(), Self::get_offer_ids_alias())
             .from(MediaIden::Table)
@@ -64,9 +62,49 @@ impl Media {
                 Expr::col((MediaIden::Table, MediaIden::MediaId))
                     .equals((MediaOfferIden::Table, MediaOfferIden::MediaId)),
             )
-            .group_by_col((MediaIden::Table, MediaIden::MediaId));
+            .group_by_col((MediaIden::Table, MediaIden::MediaId))
+            .to_owned()
+    }
 
-        query
+    fn select_accessible(user_id: &String) -> SelectStatement {
+        Query::select()
+            .column((MediaIden::Table, Asterisk))
+            .from(MediaIden::Table)
+            .left_join(
+                MediaOfferIden::Table,
+                Expr::col((MediaIden::Table, MediaIden::MediaId))
+                    .equals((MediaOfferIden::Table, MediaOfferIden::MediaId)),
+            )
+            .left_join(
+                MediaSubscriptionIden::Table,
+                Expr::col((MediaOfferIden::Table, MediaOfferIden::OfferId))
+                    .equals((
+                        MediaSubscriptionIden::Table,
+                        MediaSubscriptionIden::OfferId,
+                    )),
+            )
+            .and_where(
+                Expr::col((
+                    MediaSubscriptionIden::Table,
+                    MediaSubscriptionIden::BuyerUserId,
+                ))
+                .eq(user_id),
+            )
+            .and_where(
+                Expr::col((
+                    MediaSubscriptionIden::Table,
+                    MediaSubscriptionIden::SubscriptionStatus,
+                ))
+                .eq(MediaSubscription::ACTIVE_KEY),
+            )
+            .and_where(
+                Expr::col((
+                    MediaSubscriptionIden::Table,
+                    MediaSubscriptionIden::PayedUntil,
+                ))
+                .gte(Utc::now()),
+            )
+            .to_owned()
     }
 
     fn add_filter(
@@ -153,24 +191,7 @@ impl Media {
         Ok(Self::from(row))
     }
 
-    pub async fn get(
-        pool: &Pool,
-        media_id: &Uuid,
-    ) -> Result<Option<Self>, DbError> {
-        let client = pool.get().await?;
-
-        let (sql, values) = Self::select_with_relations()
-            .and_where(
-                Expr::col((MediaIden::Table, MediaIden::MediaId)).eq(*media_id),
-            )
-            .build_postgres(PostgresQueryBuilder);
-
-        let row = client.query_opt(sql.as_str(), &values.as_params()).await?;
-
-        Ok(row.map(Self::from))
-    }
-
-    pub async fn get_for_user(
+    pub async fn get_for_owner(
         pool: &Pool,
         media_id: &Uuid,
         user_id: &String,
@@ -189,6 +210,24 @@ impl Media {
         Ok(row.map(Self::from))
     }
 
+    pub async fn get_accessible(
+        pool: &Pool,
+        media_id: &Uuid,
+        user_id: &String,
+    ) -> Result<Option<Self>, DbError> {
+        let conn = pool.get().await?;
+
+        let (sql, values) = Self::select_accessible(user_id)
+            .and_where(
+                Expr::col((MediaIden::Table, MediaIden::MediaId)).eq(*media_id),
+            )
+            .build_postgres(PostgresQueryBuilder);
+
+        let row = conn.query_opt(sql.as_str(), &values.as_params()).await?;
+
+        Ok(row.map(Self::from))
+    }
+
     pub async fn list(
         pool: &Pool,
         market_booth_id: &Uuid,
@@ -201,7 +240,7 @@ impl Media {
         let client = pool.get().await?;
 
         let (sql, values) = {
-            let mut query = Self::select_with_relations();
+            let mut query = Self::select_with_offer_ids();
 
             query
                 .and_where(
@@ -264,38 +303,7 @@ impl Media {
         let conn = pool.get().await?;
 
         let (sql, values) = {
-            let mut query = Self::select_with_relations();
-
-            query.left_join(
-                MediaSubscriptionIden::Table,
-                Expr::col((MediaOfferIden::Table, MediaOfferIden::OfferId))
-                    .equals((
-                        MediaSubscriptionIden::Table,
-                        MediaSubscriptionIden::OfferId,
-                    )),
-            );
-
-            query.and_where(
-                Expr::col((
-                    MediaSubscriptionIden::Table,
-                    MediaSubscriptionIden::BuyerUserId,
-                ))
-                .eq(user_id),
-            );
-            query.and_where(
-                Expr::col((
-                    MediaSubscriptionIden::Table,
-                    MediaSubscriptionIden::SubscriptionStatus,
-                ))
-                .eq(MediaSubscription::ACTIVE_KEY),
-            );
-            query.and_where(
-                Expr::col((
-                    MediaSubscriptionIden::Table,
-                    MediaSubscriptionIden::PayedUntil,
-                ))
-                .gte(Utc::now()),
-            );
+            let mut query = Self::select_accessible(user_id);
 
             if let Some((filter_field, filter_query)) = filter {
                 Self::add_filter(&mut query, filter_field, filter_query);

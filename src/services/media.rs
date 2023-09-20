@@ -11,12 +11,13 @@ use crate::api::peoplesmarkets::media::v1::{
     AddMediaToOfferRequest, AddMediaToOfferResponse,
     CompleteMultipartUploadRequest, CompleteMultipartUploadResponse,
     CreateMediaRequest, CreateMediaResponse, DeleteMediaRequest,
-    DeleteMediaResponse, GetMediaRequest, GetMediaResponse,
-    InitiateMultipartUploadRequest, InitiateMultipartUploadResponse,
-    ListAccessibleMediaRequest, ListAccessibleMediaResponse, ListMediaRequest,
-    ListMediaResponse, MediaResponse, Part, PutMultipartChunkRequest,
-    PutMultipartChunkResponse, RemoveMediaFromOfferRequest,
-    RemoveMediaFromOfferResponse, UpdateMediaRequest, UpdateMediaResponse,
+    DeleteMediaResponse, DownloadMediaRequest, DownloadMediaResponse,
+    GetMediaRequest, GetMediaResponse, InitiateMultipartUploadRequest,
+    InitiateMultipartUploadResponse, ListAccessibleMediaRequest,
+    ListAccessibleMediaResponse, ListMediaRequest, ListMediaResponse,
+    MediaResponse, Part, PutMultipartChunkRequest, PutMultipartChunkResponse,
+    RemoveMediaFromOfferRequest, RemoveMediaFromOfferResponse,
+    UpdateMediaRequest, UpdateMediaResponse,
 };
 use crate::auth::get_user_id;
 use crate::db::DbError;
@@ -70,11 +71,7 @@ impl MediaService {
         .max_encoding_message_size(max_message_size_bytes)
     }
 
-    fn to_response(
-        &self,
-        media: Media,
-        data: Option<Vec<u8>>,
-    ) -> MediaResponse {
+    fn to_response(&self, media: Media) -> MediaResponse {
         MediaResponse {
             media_id: media.media_id.to_string(),
             offer_ids: media
@@ -86,7 +83,6 @@ impl MediaService {
             created_at: media.created_at.timestamp(),
             updated_at: media.updated_at.timestamp(),
             name: media.name,
-            data,
         }
     }
 
@@ -157,7 +153,7 @@ impl media_service_server::MediaService for MediaService {
         transaction.commit().await.map_err(DbError::from)?;
 
         Ok(Response::new(CreateMediaResponse {
-            media: Some(self.to_response(created_media, None)),
+            media: Some(self.to_response(created_media)),
         }))
     }
 
@@ -170,25 +166,42 @@ impl media_service_server::MediaService for MediaService {
         let GetMediaRequest { media_id } = request.into_inner();
         let media_uuid = parse_uuid(&media_id, "media_id")?;
 
-        let found_media = Media::get(&self.pool, &media_uuid)
-            .await?
-            .ok_or(Status::not_found(&media_id))?;
-
-        if found_media.user_id != user_id {
-            return Err(Status::not_found(""));
-        }
-
-        let file_path = Self::build_file_path(
-            &user_id,
-            &found_media.market_booth_id,
-            &media_uuid,
-        );
-
-        let data = self.file_service.get_file(&file_path).await?;
+        let found_media =
+            Media::get_for_owner(&self.pool, &media_uuid, &user_id)
+                .await?
+                .ok_or(Status::not_found(&media_id))?;
 
         Ok(Response::new(GetMediaResponse {
-            media: Some(self.to_response(found_media, Some(data))),
+            media: Some(self.to_response(found_media)),
         }))
+    }
+
+    async fn download_media(
+        &self,
+        request: Request<DownloadMediaRequest>,
+    ) -> Result<Response<DownloadMediaResponse>, Status> {
+        let user_id = get_user_id(request.metadata(), &self.verifier).await?;
+
+        let DownloadMediaRequest { media_id } = request.into_inner();
+        let media_uuid = parse_uuid(&media_id, "media_id")?;
+
+        let found_media =
+            Media::get_accessible(&self.pool, &media_uuid, &user_id)
+                .await?
+                .ok_or(Status::not_found(&media_id))?;
+
+        let file_path = Self::build_file_path(
+            &found_media.user_id,
+            &found_media.market_booth_id,
+            &found_media.media_id,
+        );
+
+        let download_url = self
+            .file_service
+            .get_presigned_url(&file_path, &found_media.name)
+            .await?;
+
+        Ok(Response::new(DownloadMediaResponse { download_url }))
     }
 
     async fn list_media(
@@ -226,7 +239,7 @@ impl media_service_server::MediaService for MediaService {
         Ok(Response::new(ListMediaResponse {
             medias: found_medias
                 .into_iter()
-                .map(|m| self.to_response(m, None))
+                .map(|m| self.to_response(m))
                 .collect(),
             pagination: Some(pagination),
         }))
@@ -244,30 +257,26 @@ impl media_service_server::MediaService for MediaService {
             filter,
         } = request.into_inner();
 
-        let user_id = if let Ok(user_id) = user_id {
-            user_id
-        } else {
-            return Ok(Response::new(ListAccessibleMediaResponse {
-                medias: Vec::new(),
-                pagination,
-            }));
-        };
-
         let (limit, offset, pagination) = paginate(pagination)?;
 
         let filter = filter.map(|f| (f.field(), f.query));
 
         let order_by = order_by.map(|o| (o.field(), o.direction()));
 
-        let found_medias = Media::list_accessible(
-            &self.pool, &user_id, limit, offset, filter, order_by,
-        )
-        .await?;
+        let found_medias = match user_id {
+            Ok(user_id) => {
+                Media::list_accessible(
+                    &self.pool, &user_id, limit, offset, filter, order_by,
+                )
+                .await?
+            }
+            Err(_) => vec![],
+        };
 
         Ok(Response::new(ListAccessibleMediaResponse {
             medias: found_medias
                 .into_iter()
-                .map(|m| self.to_response(m, None))
+                .map(|m| self.to_response(m))
                 .collect(),
             pagination: Some(pagination),
         }))
@@ -287,9 +296,10 @@ impl media_service_server::MediaService for MediaService {
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
 
-        let found_media = Media::get(&self.pool, &media_uuid)
-            .await?
-            .ok_or(Status::not_found(&media_id))?;
+        let found_media =
+            Media::get_for_owner(&self.pool, &media_uuid, &user_id)
+                .await?
+                .ok_or(Status::not_found(&media_id))?;
 
         let new_size =
             file.as_ref().and_then(|f| i64::try_from(f.data.len()).ok());
@@ -305,7 +315,7 @@ impl media_service_server::MediaService for MediaService {
         }
 
         Ok(Response::new(UpdateMediaResponse {
-            media: Some(self.to_response(updated_media, None)),
+            media: Some(self.to_response(updated_media)),
         }))
     }
 
@@ -319,9 +329,10 @@ impl media_service_server::MediaService for MediaService {
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
 
-        let found_media = Media::get(&self.pool, &media_uuid)
-            .await?
-            .ok_or(Status::not_found(&media_id))?;
+        let found_media =
+            Media::get_for_owner(&self.pool, &media_uuid, &user_id)
+                .await?
+                .ok_or(Status::not_found(&media_id))?;
 
         let mut conn = self.pool.get().await.map_err(DbError::from)?;
         let transaction = conn.transaction().await.map_err(DbError::from)?;
@@ -347,13 +358,10 @@ impl media_service_server::MediaService for MediaService {
 
         self.quota_service.check_quota(&user_id).await?;
 
-        let found_media = Media::get(&self.pool, &media_uuid)
-            .await?
-            .ok_or(Status::not_found(&media_id))?;
-
-        if found_media.user_id != user_id {
-            return Err(Status::not_found(&media_id));
-        }
+        let found_media =
+            Media::get_for_owner(&self.pool, &media_uuid, &user_id)
+                .await?
+                .ok_or(Status::not_found(&media_id))?;
 
         let upload_id = self
             .file_service
@@ -429,13 +437,10 @@ impl media_service_server::MediaService for MediaService {
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
 
-        let found_media = Media::get(&self.pool, &media_uuid)
-            .await?
-            .ok_or(Status::not_found(&media_id))?;
-
-        if found_media.user_id != user_id {
-            return Err(Status::not_found(&media_id));
-        }
+        let found_media =
+            Media::get_for_owner(&self.pool, &media_uuid, &user_id)
+                .await?
+                .ok_or(Status::not_found(&media_id))?;
 
         let parts = parts
             .into_iter()
@@ -463,18 +468,18 @@ impl media_service_server::MediaService for MediaService {
         let AddMediaToOfferRequest { media_id, offer_id } =
             request.into_inner();
 
-        let media_id = parse_uuid(&media_id, "media_id")?;
+        let media_uuid = parse_uuid(&media_id, "media_id")?;
         let offer_uuid = parse_uuid(&offer_id, "media_id")?;
 
         self.commerce_service
             .check_offer_and_owner(&offer_id, &user_id)
             .await?;
 
-        Media::get_for_user(&self.pool, &media_id, &user_id)
+        Media::get_for_owner(&self.pool, &media_uuid, &user_id)
             .await?
-            .ok_or(Status::not_found("media"))?;
+            .ok_or(Status::not_found(media_id))?;
 
-        MediaOffer::create(&self.pool, &media_id, &offer_uuid, &user_id)
+        MediaOffer::create(&self.pool, &media_uuid, &offer_uuid, &user_id)
             .await?;
 
         Ok(Response::new(AddMediaToOfferResponse {}))
