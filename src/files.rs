@@ -1,5 +1,8 @@
+use std::time::Duration;
+
 use aws_credential_types::Credentials;
 use aws_sdk_s3::config::Region;
+use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::primitives::ByteStream;
 use aws_sdk_s3::types::{CompletedMultipartUpload, CompletedPart};
 use aws_sdk_s3::Client;
@@ -168,28 +171,37 @@ impl FileService {
         Ok(())
     }
 
-    pub async fn get_file(
+    pub async fn get_presigned_url(
         &self,
         file_path: &String,
-    ) -> Result<Vec<u8>, Status> {
-        let found_file = self
+        file_name: &String,
+    ) -> Result<String, Status> {
+        let presigned_config = PresigningConfig::expires_in(
+            Duration::from_secs(1800),
+        )
+        .map_err(|err| {
+            tracing::log::error!("[FileService.get_presigned_url]: {err}");
+            Status::internal("")
+        })?;
+
+        let uri = self
             .client
             .get_object()
             .bucket(&self.bucket_name)
             .key(file_path)
-            .send()
+            .response_content_disposition(format!(
+                r#"attachment; filename="{file_name}""#
+            ))
+            .presigned(presigned_config)
             .await
             .map_err(|err| {
-                tracing::log::error!("[FileService.get_file]: {err}");
-                Status::not_found("")
-            })?;
+                tracing::log::error!("[FileService.get_presigned_url]: {err}");
+                Status::internal("")
+            })?
+            .uri()
+            .clone();
 
-        let data = found_file.body.collect().await.map_err(|err| {
-            tracing::log::error!("[FileService.get_file]: {err}");
-            Status::internal("")
-        })?;
-
-        Ok(data.to_vec())
+        Ok(uri.to_string())
     }
 
     pub async fn remove_file(&self, file_path: &String) -> Result<(), Status> {

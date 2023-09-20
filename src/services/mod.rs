@@ -1,7 +1,7 @@
 mod media;
 mod media_subscription;
 
-pub use media::MediaService;
+pub use self::media::MediaService;
 pub use media_subscription::MediaSubscriptionService;
 
 use tonic::Status;
