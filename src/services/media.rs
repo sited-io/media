@@ -78,7 +78,7 @@ impl MediaService {
                 .offer_ids
                 .map(|ids| ids.into_iter().map(|id| id.to_string()).collect())
                 .unwrap_or_default(),
-            market_booth_id: media.market_booth_id.to_string(),
+            shop_id: media.shop_id.to_string(),
             user_id: media.user_id,
             created_at: media.created_at.timestamp(),
             updated_at: media.updated_at.timestamp(),
@@ -88,10 +88,10 @@ impl MediaService {
 
     fn build_file_path(
         user_id: &String,
-        market_booth_id: &Uuid,
+        shop_id: &Uuid,
         media_id: &Uuid,
     ) -> String {
-        format!("{user_id}/{market_booth_id}/{media_id}")
+        format!("{user_id}/{shop_id}/{media_id}")
     }
 }
 
@@ -104,24 +104,22 @@ impl media_service_server::MediaService for MediaService {
         let user_id = get_user_id(request.metadata(), &self.verifier).await?;
 
         let CreateMediaRequest {
-            market_booth_id,
+            shop_id,
             name,
             file,
         } = request.into_inner();
 
-        let market_booth_uuid =
-            parse_uuid(&market_booth_id, "market_booth_id")?;
+        let shop_uuid = parse_uuid(&shop_id, "shop_id")?;
 
         self.quota_service.check_quota(&user_id).await?;
 
         self.commerce_service
-            .check_market_booth_and_owner(&market_booth_id, &user_id)
+            .check_shop_and_owner(&shop_id, &user_id)
             .await?;
 
         let media_id = Uuid::new_v4();
 
-        let file_path =
-            Self::build_file_path(&user_id, &market_booth_uuid, &media_id);
+        let file_path = Self::build_file_path(&user_id, &shop_uuid, &media_id);
 
         let mut conn = self.pool.get().await.map_err(DbError::from)?;
         let transaction = conn.transaction().await.map_err(DbError::from)?;
@@ -136,7 +134,7 @@ impl media_service_server::MediaService for MediaService {
         let created_media = Media::create(
             &transaction,
             &media_id,
-            &market_booth_uuid,
+            &shop_uuid,
             &user_id,
             &name,
             &file_path,
@@ -192,7 +190,7 @@ impl media_service_server::MediaService for MediaService {
 
         let file_path = Self::build_file_path(
             &found_media.user_id,
-            &found_media.market_booth_id,
+            &found_media.shop_id,
             &found_media.media_id,
         );
 
@@ -211,13 +209,13 @@ impl media_service_server::MediaService for MediaService {
         let user_id = get_user_id(request.metadata(), &self.verifier).await?;
 
         let ListMediaRequest {
-            market_booth_id,
+            shop_id,
             pagination,
             order_by,
             filter,
         } = request.into_inner();
 
-        let market_booth_id = parse_uuid(&market_booth_id, "market_booth_id")?;
+        let shop_id = parse_uuid(&shop_id, "shop_id")?;
 
         let (limit, offset, pagination) = paginate(pagination)?;
 
@@ -226,13 +224,7 @@ impl media_service_server::MediaService for MediaService {
         let order_by = order_by.map(|o| (o.field(), o.direction()));
 
         let found_medias = Media::list(
-            &self.pool,
-            &market_booth_id,
-            &user_id,
-            limit,
-            offset,
-            filter,
-            order_by,
+            &self.pool, &shop_id, &user_id, limit, offset, filter, order_by,
         )
         .await?;
 

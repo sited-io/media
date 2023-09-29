@@ -6,7 +6,7 @@ pub struct MediaResponse {
     #[prost(string, repeated, tag = "2")]
     pub offer_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, tag = "3")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
     pub user_id: ::prost::alloc::string::String,
     #[prost(int64, tag = "5")]
@@ -28,7 +28,7 @@ pub struct MediaUpload {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateMediaRequest {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "3")]
@@ -84,7 +84,7 @@ pub struct MediaFilter {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListMediaRequest {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
     #[prost(message, optional, tag = "3")]

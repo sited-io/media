@@ -23,7 +23,7 @@ use super::{MediaOffer, MediaSubscription};
 pub enum MediaIden {
     Table,
     MediaId,
-    MarketBoothId,
+    ShopId,
     UserId,
     CreatedAt,
     UpdatedAt,
@@ -36,7 +36,7 @@ pub enum MediaIden {
 pub struct Media {
     pub media_id: Uuid,
     pub offer_ids: Option<Vec<Uuid>>,
-    pub market_booth_id: Uuid,
+    pub shop_id: Uuid,
     pub user_id: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -157,7 +157,7 @@ impl Media {
     pub async fn create<'a>(
         transaction: &Transaction<'a>,
         media_id: &Uuid,
-        market_booth_id: &Uuid,
+        shop_id: &Uuid,
         user_id: &String,
         name: &String,
         file_path: &String,
@@ -167,7 +167,7 @@ impl Media {
             .into_table(MediaIden::Table)
             .columns([
                 MediaIden::MediaId,
-                MediaIden::MarketBoothId,
+                MediaIden::ShopId,
                 MediaIden::UserId,
                 MediaIden::Name,
                 MediaIden::DataUrl,
@@ -175,7 +175,7 @@ impl Media {
             ])
             .values([
                 (*media_id).into(),
-                (*market_booth_id).into(),
+                (*shop_id).into(),
                 user_id.into(),
                 name.into(),
                 file_path.into(),
@@ -230,7 +230,7 @@ impl Media {
 
     pub async fn list(
         pool: &Pool,
-        market_booth_id: &Uuid,
+        shop_id: &Uuid,
         user_id: &String,
         limit: u64,
         offset: u64,
@@ -244,8 +244,8 @@ impl Media {
 
             query
                 .and_where(
-                    Expr::col((MediaIden::Table, MediaIden::MarketBoothId))
-                        .eq(*market_booth_id),
+                    Expr::col((MediaIden::Table, MediaIden::ShopId))
+                        .eq(*shop_id),
                 )
                 .and_where(
                     Expr::col((MediaIden::Table, MediaIden::UserId))
@@ -409,8 +409,7 @@ impl From<&Row> for Media {
         Self {
             media_id: row.get(MediaIden::MediaId.to_string().as_str()),
             offer_ids: row.try_get(Self::OFFER_IDS_ALIAS).ok(),
-            market_booth_id: row
-                .get(MediaIden::MarketBoothId.to_string().as_str()),
+            shop_id: row.get(MediaIden::ShopId.to_string().as_str()),
             user_id: row.get(MediaIden::UserId.to_string().as_str()),
             created_at: row.get(MediaIden::CreatedAt.to_string().as_str()),
             updated_at: row.get(MediaIden::UpdatedAt.to_string().as_str()),
