@@ -1,231 +1,182 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MarketBoothResponse {
+pub struct ShopCustomizationResponse {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub user_id: ::prost::alloc::string::String,
-    #[prost(int64, tag = "3")]
-    pub created_at: i64,
-    #[prost(int64, tag = "4")]
-    pub updated_at: i64,
-    #[prost(string, tag = "5")]
-    pub name: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "3")]
+    pub created_at: u64,
+    #[prost(uint64, tag = "4")]
+    pub updated_at: u64,
+    #[prost(string, optional, tag = "5")]
+    pub logo_image_light_url: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "6")]
-    pub description: ::core::option::Option<::prost::alloc::string::String>,
+    pub logo_image_dark_url: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "7")]
-    pub image_url: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, tag = "8")]
-    pub platform_fee_percent: u32,
-    #[prost(uint32, tag = "9")]
-    pub minimum_platform_fee_cent: u32,
+    pub banner_image_light_url: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "8")]
+    pub banner_image_dark_url: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bool, optional, tag = "9")]
+    pub show_banner_in_listing: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag = "10")]
+    pub show_banner_on_home: ::core::option::Option<bool>,
+    #[prost(string, optional, tag = "11")]
+    pub header_background_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "12")]
+    pub header_background_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "13")]
+    pub header_content_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "14")]
+    pub header_content_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "15")]
+    pub secondary_background_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "16")]
+    pub secondary_background_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "17")]
+    pub secondary_content_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "18")]
+    pub secondary_content_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateMarketBoothRequest {
+pub struct PutShopCustomizationRequest {
     #[prost(string, tag = "1")]
-    pub name: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "2")]
-    pub description: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, optional, tag = "3")]
-    pub platform_fee_percent: ::core::option::Option<u32>,
-    #[prost(uint32, optional, tag = "4")]
-    pub minimum_platform_fee_cent: ::core::option::Option<u32>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateMarketBoothResponse {
-    #[prost(message, optional, tag = "1")]
-    pub market_booth: ::core::option::Option<MarketBoothResponse>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetMarketBoothRequest {
-    #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetMarketBoothResponse {
-    #[prost(message, optional, tag = "1")]
-    pub market_booth: ::core::option::Option<MarketBoothResponse>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MarketBoothsOrderBy {
-    #[prost(enumeration = "MarketBoothsOrderByField", tag = "1")]
-    pub field: i32,
-    #[prost(enumeration = "super::super::ordering::v1::Direction", tag = "2")]
-    pub direction: i32,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MarketBoothsFilter {
-    #[prost(enumeration = "MarketBoothsFilterField", tag = "1")]
-    pub field: i32,
-    #[prost(string, tag = "2")]
-    pub query: ::prost::alloc::string::String,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ListMarketBoothsRequest {
-    #[prost(string, optional, tag = "1")]
-    pub user_id: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
-    #[prost(message, optional, tag = "3")]
-    pub order_by: ::core::option::Option<MarketBoothsOrderBy>,
-    #[prost(message, optional, tag = "4")]
-    pub filter: ::core::option::Option<MarketBoothsFilter>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ListMarketBoothsResponse {
-    #[prost(message, repeated, tag = "1")]
-    pub market_booths: ::prost::alloc::vec::Vec<MarketBoothResponse>,
-    #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateMarketBoothRequest {
-    #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "2")]
-    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    pub header_background_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, optional, tag = "3")]
-    pub description: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, optional, tag = "4")]
-    pub platform_fee_percent: ::core::option::Option<u32>,
-    #[prost(uint32, optional, tag = "5")]
-    pub minimum_platform_fee_cent: ::core::option::Option<u32>,
+    pub header_background_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "4")]
+    pub header_content_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "5")]
+    pub header_content_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "6")]
+    pub secondary_background_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "7")]
+    pub secondary_background_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "8")]
+    pub secondary_content_color_light: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+    #[prost(string, optional, tag = "9")]
+    pub secondary_content_color_dark: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateMarketBoothResponse {
+pub struct PutShopCustomizationResponse {
     #[prost(message, optional, tag = "1")]
-    pub market_booth: ::core::option::Option<MarketBoothResponse>,
+    pub shop_customization: ::core::option::Option<ShopCustomizationResponse>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct DeleteMarketBoothRequest {
+pub struct GetShopCustomizationRequest {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct DeleteMarketBoothResponse {}
+pub struct GetShopCustomizationResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop_customization: ::core::option::Option<ShopCustomizationResponse>,
+}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateImageOfMarketBoothRequest {
+pub struct DeleteShopCustomizationRequest {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteShopCustomizationResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutBannerImageToShopRequest {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub image: ::core::option::Option<super::super::media::v1::MediaUpload>,
+    #[prost(message, optional, tag = "3")]
+    pub image_dark: ::core::option::Option<super::super::media::v1::MediaUpload>,
+    #[prost(bool, optional, tag = "4")]
+    pub show_in_listing: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag = "5")]
+    pub show_on_home: ::core::option::Option<bool>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateImageOfMarketBoothResponse {}
+pub struct PutBannerImageToShopResponse {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RemoveImageFromMarketBoothRequest {
+pub struct RemoveBannerImageFromShopRequest {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RemoveImageFromMarketBoothResponse {}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum MarketBoothsOrderByField {
-    Unspecified = 0,
-    CreatedAt = 1,
-    UpdatedAt = 2,
-    Name = 3,
-    Random = 4,
+pub struct RemoveBannerImageFromShopResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutLogoImageToShopRequest {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub image: ::core::option::Option<super::super::media::v1::MediaUpload>,
+    #[prost(message, optional, tag = "3")]
+    pub image_dark: ::core::option::Option<super::super::media::v1::MediaUpload>,
 }
-impl MarketBoothsOrderByField {
-    /// String value of the enum field names used in the ProtoBuf definition.
-    ///
-    /// The values are not transformed in any way and thus are considered stable
-    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
-    pub fn as_str_name(&self) -> &'static str {
-        match self {
-            MarketBoothsOrderByField::Unspecified => {
-                "MARKET_BOOTHS_ORDER_BY_FIELD_UNSPECIFIED"
-            }
-            MarketBoothsOrderByField::CreatedAt => {
-                "MARKET_BOOTHS_ORDER_BY_FIELD_CREATED_AT"
-            }
-            MarketBoothsOrderByField::UpdatedAt => {
-                "MARKET_BOOTHS_ORDER_BY_FIELD_UPDATED_AT"
-            }
-            MarketBoothsOrderByField::Name => "MARKET_BOOTHS_ORDER_BY_FIELD_NAME",
-            MarketBoothsOrderByField::Random => "MARKET_BOOTHS_ORDER_BY_FIELD_RANDOM",
-        }
-    }
-    /// Creates an enum from field names used in the ProtoBuf definition.
-    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
-        match value {
-            "MARKET_BOOTHS_ORDER_BY_FIELD_UNSPECIFIED" => Some(Self::Unspecified),
-            "MARKET_BOOTHS_ORDER_BY_FIELD_CREATED_AT" => Some(Self::CreatedAt),
-            "MARKET_BOOTHS_ORDER_BY_FIELD_UPDATED_AT" => Some(Self::UpdatedAt),
-            "MARKET_BOOTHS_ORDER_BY_FIELD_NAME" => Some(Self::Name),
-            "MARKET_BOOTHS_ORDER_BY_FIELD_RANDOM" => Some(Self::Random),
-            _ => None,
-        }
-    }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PutLogoImageToShopResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemoveLogoImageFromShopRequest {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum MarketBoothsFilterField {
-    Unspecified = 0,
-    Name = 1,
-    Description = 2,
-    NameAndDescription = 3,
-}
-impl MarketBoothsFilterField {
-    /// String value of the enum field names used in the ProtoBuf definition.
-    ///
-    /// The values are not transformed in any way and thus are considered stable
-    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
-    pub fn as_str_name(&self) -> &'static str {
-        match self {
-            MarketBoothsFilterField::Unspecified => {
-                "MARKET_BOOTHS_FILTER_FIELD_UNSPECIFIED"
-            }
-            MarketBoothsFilterField::Name => "MARKET_BOOTHS_FILTER_FIELD_NAME",
-            MarketBoothsFilterField::Description => {
-                "MARKET_BOOTHS_FILTER_FIELD_DESCRIPTION"
-            }
-            MarketBoothsFilterField::NameAndDescription => {
-                "MARKET_BOOTHS_FILTER_FIELD_NAME_AND_DESCRIPTION"
-            }
-        }
-    }
-    /// Creates an enum from field names used in the ProtoBuf definition.
-    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
-        match value {
-            "MARKET_BOOTHS_FILTER_FIELD_UNSPECIFIED" => Some(Self::Unspecified),
-            "MARKET_BOOTHS_FILTER_FIELD_NAME" => Some(Self::Name),
-            "MARKET_BOOTHS_FILTER_FIELD_DESCRIPTION" => Some(Self::Description),
-            "MARKET_BOOTHS_FILTER_FIELD_NAME_AND_DESCRIPTION" => {
-                Some(Self::NameAndDescription)
-            }
-            _ => None,
-        }
-    }
-}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemoveLogoImageFromShopResponse {}
 /// Generated client implementations.
-pub mod market_booth_service_client {
+pub mod shop_customization_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
-    pub struct MarketBoothServiceClient<T> {
+    pub struct ShopCustomizationServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl MarketBoothServiceClient<tonic::transport::Channel> {
+    impl ShopCustomizationServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -236,7 +187,7 @@ pub mod market_booth_service_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> MarketBoothServiceClient<T>
+    impl<T> ShopCustomizationServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -254,7 +205,7 @@ pub mod market_booth_service_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> MarketBoothServiceClient<InterceptedService<T, F>>
+        ) -> ShopCustomizationServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -268,7 +219,9 @@ pub mod market_booth_service_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + Send + Sync,
         {
-            MarketBoothServiceClient::new(InterceptedService::new(inner, interceptor))
+            ShopCustomizationServiceClient::new(
+                InterceptedService::new(inner, interceptor),
+            )
         }
         /// Compress requests with the given encoding.
         ///
@@ -301,11 +254,11 @@ pub mod market_booth_service_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
-        pub async fn create_market_booth(
+        pub async fn put_shop_customization(
             &mut self,
-            request: impl tonic::IntoRequest<super::CreateMarketBoothRequest>,
+            request: impl tonic::IntoRequest<super::PutShopCustomizationRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::CreateMarketBoothResponse>,
+            tonic::Response<super::PutShopCustomizationResponse>,
             tonic::Status,
         > {
             self.inner
@@ -319,23 +272,23 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/CreateMarketBooth",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/PutShopCustomization",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "CreateMarketBooth",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "PutShopCustomization",
                     ),
                 );
             self.inner.unary(req, path, codec).await
         }
-        pub async fn get_market_booth(
+        pub async fn get_shop_customization(
             &mut self,
-            request: impl tonic::IntoRequest<super::GetMarketBoothRequest>,
+            request: impl tonic::IntoRequest<super::GetShopCustomizationRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::GetMarketBoothResponse>,
+            tonic::Response<super::GetShopCustomizationResponse>,
             tonic::Status,
         > {
             self.inner
@@ -349,23 +302,23 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/GetMarketBooth",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/GetShopCustomization",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "GetMarketBooth",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "GetShopCustomization",
                     ),
                 );
             self.inner.unary(req, path, codec).await
         }
-        pub async fn list_market_booths(
+        pub async fn delete_shop_customization(
             &mut self,
-            request: impl tonic::IntoRequest<super::ListMarketBoothsRequest>,
+            request: impl tonic::IntoRequest<super::DeleteShopCustomizationRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::ListMarketBoothsResponse>,
+            tonic::Response<super::DeleteShopCustomizationResponse>,
             tonic::Status,
         > {
             self.inner
@@ -379,23 +332,23 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/ListMarketBooths",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/DeleteShopCustomization",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "ListMarketBooths",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "DeleteShopCustomization",
                     ),
                 );
             self.inner.unary(req, path, codec).await
         }
-        pub async fn update_market_booth(
+        pub async fn put_banner_image_to_shop(
             &mut self,
-            request: impl tonic::IntoRequest<super::UpdateMarketBoothRequest>,
+            request: impl tonic::IntoRequest<super::PutBannerImageToShopRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::UpdateMarketBoothResponse>,
+            tonic::Response<super::PutBannerImageToShopResponse>,
             tonic::Status,
         > {
             self.inner
@@ -409,23 +362,23 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/UpdateMarketBooth",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/PutBannerImageToShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "UpdateMarketBooth",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "PutBannerImageToShop",
                     ),
                 );
             self.inner.unary(req, path, codec).await
         }
-        pub async fn delete_market_booth(
+        pub async fn remove_banner_image_from_shop(
             &mut self,
-            request: impl tonic::IntoRequest<super::DeleteMarketBoothRequest>,
+            request: impl tonic::IntoRequest<super::RemoveBannerImageFromShopRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::DeleteMarketBoothResponse>,
+            tonic::Response<super::RemoveBannerImageFromShopResponse>,
             tonic::Status,
         > {
             self.inner
@@ -439,23 +392,23 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/DeleteMarketBooth",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/RemoveBannerImageFromShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "DeleteMarketBooth",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "RemoveBannerImageFromShop",
                     ),
                 );
             self.inner.unary(req, path, codec).await
         }
-        pub async fn update_image_of_market_booth(
+        pub async fn put_logo_image_to_shop(
             &mut self,
-            request: impl tonic::IntoRequest<super::UpdateImageOfMarketBoothRequest>,
+            request: impl tonic::IntoRequest<super::PutLogoImageToShopRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::UpdateImageOfMarketBoothResponse>,
+            tonic::Response<super::PutLogoImageToShopResponse>,
             tonic::Status,
         > {
             self.inner
@@ -469,23 +422,23 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/UpdateImageOfMarketBooth",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/PutLogoImageToShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "UpdateImageOfMarketBooth",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "PutLogoImageToShop",
                     ),
                 );
             self.inner.unary(req, path, codec).await
         }
-        pub async fn remove_image_from_market_booth(
+        pub async fn remove_logo_image_from_shop(
             &mut self,
-            request: impl tonic::IntoRequest<super::RemoveImageFromMarketBoothRequest>,
+            request: impl tonic::IntoRequest<super::RemoveLogoImageFromShopRequest>,
         ) -> std::result::Result<
-            tonic::Response<super::RemoveImageFromMarketBoothResponse>,
+            tonic::Response<super::RemoveLogoImageFromShopResponse>,
             tonic::Status,
         > {
             self.inner
@@ -499,14 +452,530 @@ pub mod market_booth_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.MarketBoothService/RemoveImageFromMarketBooth",
+                "/peoplesmarkets.commerce.v1.ShopCustomizationService/RemoveLogoImageFromShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.MarketBoothService",
-                        "RemoveImageFromMarketBooth",
+                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "RemoveLogoImageFromShop",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ShopResponse {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub user_id: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "3")]
+    pub created_at: u64,
+    #[prost(uint64, tag = "4")]
+    pub updated_at: u64,
+    #[prost(string, tag = "5")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "6")]
+    pub slug: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "7")]
+    pub domain: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "8")]
+    pub description: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint32, tag = "9")]
+    pub platform_fee_percent: u32,
+    #[prost(uint32, tag = "10")]
+    pub minimum_platform_fee_cent: u32,
+    #[prost(message, optional, tag = "11")]
+    pub customization: ::core::option::Option<ShopCustomizationResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateShopRequest {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub slug: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "3")]
+    pub description: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint32, optional, tag = "4")]
+    pub platform_fee_percent: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "5")]
+    pub minimum_platform_fee_cent: ::core::option::Option<u32>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateShopResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop: ::core::option::Option<ShopResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetShopRequest {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
+    #[prost(bool, optional, tag = "2")]
+    pub extended: ::core::option::Option<bool>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetShopResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop: ::core::option::Option<ShopResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetShopBySlugRequest {
+    #[prost(string, tag = "1")]
+    pub slug: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetShopBySlugResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop: ::core::option::Option<ShopResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetShopByDomainRequest {
+    #[prost(string, tag = "1")]
+    pub domain: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetShopByDomainResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop: ::core::option::Option<ShopResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ShopsOrderBy {
+    #[prost(enumeration = "ShopsOrderByField", tag = "1")]
+    pub field: i32,
+    #[prost(enumeration = "super::super::ordering::v1::Direction", tag = "2")]
+    pub direction: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ShopsFilter {
+    #[prost(enumeration = "ShopsFilterField", tag = "1")]
+    pub field: i32,
+    #[prost(string, tag = "2")]
+    pub query: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ListShopsRequest {
+    #[prost(string, optional, tag = "1")]
+    pub user_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    #[prost(message, optional, tag = "3")]
+    pub order_by: ::core::option::Option<ShopsOrderBy>,
+    #[prost(message, optional, tag = "4")]
+    pub filter: ::core::option::Option<ShopsFilter>,
+    #[prost(bool, optional, tag = "5")]
+    pub extended: ::core::option::Option<bool>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ListShopsResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub shops: ::prost::alloc::vec::Vec<ShopResponse>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateShopRequest {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "2")]
+    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "3")]
+    pub slug: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "4")]
+    pub description: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint32, optional, tag = "5")]
+    pub platform_fee_percent: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "6")]
+    pub minimum_platform_fee_cent: ::core::option::Option<u32>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateShopResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop: ::core::option::Option<ShopResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteShopRequest {
+    #[prost(string, tag = "1")]
+    pub shop_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteShopResponse {}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ShopsOrderByField {
+    Unspecified = 0,
+    CreatedAt = 1,
+    UpdatedAt = 2,
+    Name = 3,
+    Random = 4,
+}
+impl ShopsOrderByField {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            ShopsOrderByField::Unspecified => "SHOPS_ORDER_BY_FIELD_UNSPECIFIED",
+            ShopsOrderByField::CreatedAt => "SHOPS_ORDER_BY_FIELD_CREATED_AT",
+            ShopsOrderByField::UpdatedAt => "SHOPS_ORDER_BY_FIELD_UPDATED_AT",
+            ShopsOrderByField::Name => "SHOPS_ORDER_BY_FIELD_NAME",
+            ShopsOrderByField::Random => "SHOPS_ORDER_BY_FIELD_RANDOM",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "SHOPS_ORDER_BY_FIELD_UNSPECIFIED" => Some(Self::Unspecified),
+            "SHOPS_ORDER_BY_FIELD_CREATED_AT" => Some(Self::CreatedAt),
+            "SHOPS_ORDER_BY_FIELD_UPDATED_AT" => Some(Self::UpdatedAt),
+            "SHOPS_ORDER_BY_FIELD_NAME" => Some(Self::Name),
+            "SHOPS_ORDER_BY_FIELD_RANDOM" => Some(Self::Random),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ShopsFilterField {
+    Unspecified = 0,
+    Name = 1,
+    Description = 2,
+    NameAndDescription = 3,
+}
+impl ShopsFilterField {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            ShopsFilterField::Unspecified => "SHOPS_FILTER_FIELD_UNSPECIFIED",
+            ShopsFilterField::Name => "SHOPS_FILTER_FIELD_NAME",
+            ShopsFilterField::Description => "SHOPS_FILTER_FIELD_DESCRIPTION",
+            ShopsFilterField::NameAndDescription => {
+                "SHOPS_FILTER_FIELD_NAME_AND_DESCRIPTION"
+            }
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "SHOPS_FILTER_FIELD_UNSPECIFIED" => Some(Self::Unspecified),
+            "SHOPS_FILTER_FIELD_NAME" => Some(Self::Name),
+            "SHOPS_FILTER_FIELD_DESCRIPTION" => Some(Self::Description),
+            "SHOPS_FILTER_FIELD_NAME_AND_DESCRIPTION" => Some(Self::NameAndDescription),
+            _ => None,
+        }
+    }
+}
+/// Generated client implementations.
+pub mod shop_service_client {
+    #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
+    use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
+    #[derive(Debug, Clone)]
+    pub struct ShopServiceClient<T> {
+        inner: tonic::client::Grpc<T>,
+    }
+    impl ShopServiceClient<tonic::transport::Channel> {
+        /// Attempt to create a new client by connecting to a given endpoint.
+        pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
+        where
+            D: TryInto<tonic::transport::Endpoint>,
+            D::Error: Into<StdError>,
+        {
+            let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
+            Ok(Self::new(conn))
+        }
+    }
+    impl<T> ShopServiceClient<T>
+    where
+        T: tonic::client::GrpcService<tonic::body::BoxBody>,
+        T::Error: Into<StdError>,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
+        <T::ResponseBody as Body>::Error: Into<StdError> + Send,
+    {
+        pub fn new(inner: T) -> Self {
+            let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_origin(inner: T, origin: Uri) -> Self {
+            let inner = tonic::client::Grpc::with_origin(inner, origin);
+            Self { inner }
+        }
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> ShopServiceClient<InterceptedService<T, F>>
+        where
+            F: tonic::service::Interceptor,
+            T::ResponseBody: Default,
+            T: tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+                Response = http::Response<
+                    <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
+                >,
+            >,
+            <T as tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+            >>::Error: Into<StdError> + Send + Sync,
+        {
+            ShopServiceClient::new(InterceptedService::new(inner, interceptor))
+        }
+        /// Compress requests with the given encoding.
+        ///
+        /// This requires the server to support it otherwise it might respond with an
+        /// error.
+        #[must_use]
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.send_compressed(encoding);
+            self
+        }
+        /// Enable decompressing responses.
+        #[must_use]
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.accept_compressed(encoding);
+            self
+        }
+        /// Limits the maximum size of a decoded message.
+        ///
+        /// Default: `4MB`
+        #[must_use]
+        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_decoding_message_size(limit);
+            self
+        }
+        /// Limits the maximum size of an encoded message.
+        ///
+        /// Default: `usize::MAX`
+        #[must_use]
+        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_encoding_message_size(limit);
+            self
+        }
+        pub async fn create_shop(
+            &mut self,
+            request: impl tonic::IntoRequest<super::CreateShopRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::CreateShopResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/CreateShop",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "CreateShop",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_shop(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetShopRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetShopResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/GetShop",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("peoplesmarkets.commerce.v1.ShopService", "GetShop"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_shop_by_slug(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetShopBySlugRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetShopBySlugResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/GetShopBySlug",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "GetShopBySlug",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_shop_by_domain(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetShopByDomainRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetShopByDomainResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/GetShopByDomain",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "GetShopByDomain",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn list_shops(
+            &mut self,
+            request: impl tonic::IntoRequest<super::ListShopsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ListShopsResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/ListShops",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "ListShops",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn update_shop(
+            &mut self,
+            request: impl tonic::IntoRequest<super::UpdateShopRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::UpdateShopResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/UpdateShop",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "UpdateShop",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn delete_shop(
+            &mut self,
+            request: impl tonic::IntoRequest<super::DeleteShopRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::DeleteShopResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/DeleteShop",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "DeleteShop",
                     ),
                 );
             self.inner.unary(req, path, codec).await
@@ -657,27 +1126,33 @@ pub struct OfferResponse {
     #[prost(string, tag = "1")]
     pub offer_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
-    pub market_booth_name: ::prost::alloc::string::String,
+    pub shop_name: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
+    pub shop_slug: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "5")]
+    pub shop_domain: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "6")]
     pub user_id: ::prost::alloc::string::String,
-    #[prost(int64, tag = "5")]
+    #[prost(int64, tag = "7")]
     pub created_at: i64,
-    #[prost(int64, tag = "6")]
+    #[prost(int64, tag = "8")]
     pub updated_at: i64,
-    #[prost(string, tag = "7")]
+    #[prost(string, tag = "9")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, tag = "8")]
+    #[prost(string, tag = "10")]
     pub description: ::prost::alloc::string::String,
-    #[prost(bool, tag = "9")]
+    #[prost(bool, tag = "11")]
     pub is_active: bool,
-    #[prost(message, repeated, tag = "10")]
-    pub images: ::prost::alloc::vec::Vec<OfferImageResponse>,
-    #[prost(message, optional, tag = "11")]
-    pub price: ::core::option::Option<Price>,
-    #[prost(enumeration = "OfferType", tag = "12")]
+    #[prost(bool, tag = "12")]
+    pub is_featured: bool,
+    #[prost(enumeration = "OfferType", tag = "13")]
     pub r#type: i32,
+    #[prost(message, repeated, tag = "14")]
+    pub images: ::prost::alloc::vec::Vec<OfferImageResponse>,
+    #[prost(message, optional, tag = "15")]
+    pub price: ::core::option::Option<Price>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -693,13 +1168,15 @@ pub struct OfferImageResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateOfferRequest {
     #[prost(string, tag = "1")]
-    pub market_booth_id: ::prost::alloc::string::String,
+    pub shop_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
     #[prost(string, optional, tag = "3")]
     pub description: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(enumeration = "OfferType", tag = "4")]
     pub r#type: i32,
+    #[prost(bool, tag = "5")]
+    pub is_featured: bool,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -741,7 +1218,7 @@ pub struct ListOffersRequest {
     #[prost(string, optional, tag = "1")]
     pub user_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "2")]
-    pub market_booth_id: ::core::option::Option<::prost::alloc::string::String>,
+    pub shop_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
     #[prost(message, optional, tag = "4")]
@@ -770,6 +1247,8 @@ pub struct UpdateOfferRequest {
     pub is_active: ::core::option::Option<bool>,
     #[prost(enumeration = "OfferType", optional, tag = "5")]
     pub r#type: ::core::option::Option<i32>,
+    #[prost(bool, optional, tag = "6")]
+    pub is_featured: ::core::option::Option<bool>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -903,6 +1382,7 @@ pub enum OffersFilterField {
     Description = 2,
     NameAndDescription = 3,
     Type = 4,
+    IsFeatured = 5,
 }
 impl OffersFilterField {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -918,6 +1398,7 @@ impl OffersFilterField {
                 "OFFERS_FILTER_FIELD_NAME_AND_DESCRIPTION"
             }
             OffersFilterField::Type => "OFFERS_FILTER_FIELD_TYPE",
+            OffersFilterField::IsFeatured => "OFFERS_FILTER_FIELD_IS_FEATURED",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -928,6 +1409,7 @@ impl OffersFilterField {
             "OFFERS_FILTER_FIELD_DESCRIPTION" => Some(Self::Description),
             "OFFERS_FILTER_FIELD_NAME_AND_DESCRIPTION" => Some(Self::NameAndDescription),
             "OFFERS_FILTER_FIELD_TYPE" => Some(Self::Type),
+            "OFFERS_FILTER_FIELD_IS_FEATURED" => Some(Self::IsFeatured),
             _ => None,
         }
     }

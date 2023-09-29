@@ -51,6 +51,7 @@ impl MediaSubscription {
         MediaSubscriptionIden::PayedUntil,
     ];
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn put(
         pool: &Pool,
         media_subscription_id: &Uuid,
