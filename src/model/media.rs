@@ -16,7 +16,7 @@ use crate::db::DbError;
 
 use super::media_offer::MediaOfferIden;
 use super::media_subscription::MediaSubscriptionIden;
-use super::{MediaOffer, MediaSubscription};
+use super::MediaOffer;
 
 #[derive(Debug, Clone, Iden)]
 #[iden(rename = "medias")]
@@ -89,13 +89,6 @@ impl Media {
                     MediaSubscriptionIden::BuyerUserId,
                 ))
                 .eq(user_id),
-            )
-            .and_where(
-                Expr::col((
-                    MediaSubscriptionIden::Table,
-                    MediaSubscriptionIden::SubscriptionStatus,
-                ))
-                .eq(MediaSubscription::ACTIVE_KEY),
             )
             .and_where(
                 Expr::col((

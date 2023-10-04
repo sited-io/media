@@ -101,7 +101,9 @@ impl media_service_server::MediaService for MediaService {
         &self,
         request: Request<CreateMediaRequest>,
     ) -> Result<Response<CreateMediaResponse>, Status> {
-        let user_id = get_user_id(request.metadata(), &self.verifier).await?;
+        let metadata = request.metadata().clone();
+
+        let user_id = get_user_id(&metadata, &self.verifier).await?;
 
         let CreateMediaRequest {
             shop_id,
@@ -114,7 +116,7 @@ impl media_service_server::MediaService for MediaService {
         self.quota_service.check_quota(&user_id).await?;
 
         self.commerce_service
-            .check_shop_and_owner(&shop_id, &user_id)
+            .check_shop_and_owner(&shop_id, &user_id, &metadata)
             .await?;
 
         let media_id = Uuid::new_v4();
@@ -455,7 +457,9 @@ impl media_service_server::MediaService for MediaService {
         &self,
         request: Request<AddMediaToOfferRequest>,
     ) -> Result<Response<AddMediaToOfferResponse>, Status> {
-        let user_id = get_user_id(request.metadata(), &self.verifier).await?;
+        let metadata = request.metadata().clone();
+
+        let user_id = get_user_id(&metadata, &self.verifier).await?;
 
         let AddMediaToOfferRequest { media_id, offer_id } =
             request.into_inner();
@@ -464,7 +468,7 @@ impl media_service_server::MediaService for MediaService {
         let offer_uuid = parse_uuid(&offer_id, "media_id")?;
 
         self.commerce_service
-            .check_offer_and_owner(&offer_id, &user_id)
+            .check_offer_and_owner(&offer_id, &user_id, &metadata)
             .await?;
 
         Media::get_for_owner(&self.pool, &media_uuid, &user_id)

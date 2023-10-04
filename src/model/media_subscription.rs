@@ -38,8 +38,6 @@ pub struct MediaSubscription {
 }
 
 impl MediaSubscription {
-    pub const ACTIVE_KEY: &'static str = "active";
-
     const PUT_COLUMNS: [MediaSubscriptionIden; 8] = [
         MediaSubscriptionIden::MediaSubscriptionId,
         MediaSubscriptionIden::BuyerUserId,

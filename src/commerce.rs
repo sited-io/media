@@ -1,3 +1,5 @@
+use http::header::AUTHORIZATION;
+use tonic::metadata::MetadataMap;
 use tonic::transport::Channel;
 use tonic::{Request, Status};
 
@@ -24,14 +26,23 @@ impl CommerceService {
         &self,
         shop_id: &String,
         user_id: &String,
+        metadata: &MetadataMap,
     ) -> Result<(), Status> {
         let mut client = self.shop_client.clone();
 
+        let mut request = Request::new(GetShopRequest {
+            shop_id: shop_id.to_owned(),
+            extended: None,
+        });
+
+        if let Some(auth_header) = metadata.get(AUTHORIZATION.as_str()) {
+            request
+                .metadata_mut()
+                .insert(AUTHORIZATION.as_str(), auth_header.to_owned());
+        }
+
         let shop = client
-            .get_shop(Request::new(GetShopRequest {
-                shop_id: shop_id.to_owned(),
-                extended: None,
-            }))
+            .get_shop(request)
             .await
             .map_err(|_| Status::not_found("shop"))?
             .into_inner()
@@ -49,13 +60,22 @@ impl CommerceService {
         &self,
         offer_id: &String,
         user_id: &String,
+        metadata: &MetadataMap,
     ) -> Result<(), Status> {
         let mut client = self.offer_client.clone();
 
+        let mut request = Request::new(GetOfferRequest {
+            offer_id: offer_id.to_owned(),
+        });
+
+        if let Some(token) = metadata.get(AUTHORIZATION.as_str()) {
+            request
+                .metadata_mut()
+                .insert(AUTHORIZATION.as_str(), token.to_owned());
+        }
+
         let offer = client
-            .get_offer(Request::new(GetOfferRequest {
-                offer_id: offer_id.to_owned(),
-            }))
+            .get_offer(request)
             .await
             .map_err(|_| Status::not_found("offer"))?
             .into_inner()
