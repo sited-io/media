@@ -30,6 +30,10 @@ job "media" {
               destination_name = "commerce-api"
               local_bind_port  = 10000
             }
+            upstreams {
+              destination_name = "payment-api"
+              local_bind_port  = 10001
+            }
           }
         }
       }
@@ -89,6 +93,7 @@ SERVICE_USER_CLIENT_SECRET='{{ .Data.data.SERVICE_USER_CLIENT_SECRET }}'
 {{ end }}
 
 COMMERCE_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_commerce-api" }}'
+PAYMENT_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_payment-api" }}'
 EOF
       }
 
