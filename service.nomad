@@ -69,6 +69,7 @@ DB_PASSWORD='{{ .Data.password }}'
 
 {{ with nomadVar "nomad/jobs/" }}
 JWKS_HOST='{{ .JWKS_HOST }}'
+OAUTH_HOST='{{ .JWKS_HOST }}'
 {{ end }}
 JWKS_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_zitadel" }}/oauth/v2/keys'
 
