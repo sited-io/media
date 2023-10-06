@@ -19,6 +19,18 @@ fn parse_uuid(uuid_string: &str, field: &str) -> Result<Uuid, Status> {
         .map_err(|_| uuid_err_to_grpc_status(field))
 }
 
+fn parse_optional_uuid(
+    uuid_string: Option<String>,
+    field: &str,
+) -> Result<Option<Uuid>, Status> {
+    if let Some(uuid_string) = uuid_string {
+        let uuid = parse_uuid(&uuid_string, field)?;
+        Ok(Some(uuid))
+    } else {
+        Ok(None)
+    }
+}
+
 /**
  * Returns limit and offset for requested Pagination or defaults.
  */

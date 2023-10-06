@@ -9,8 +9,8 @@ use media::db::{init_db_pool, migrate};
 use media::files::FileService;
 use media::logging::{LogOnFailure, LogOnRequest, LogOnResponse};
 use media::{
-    get_env_var, init_jwks_verifier, CommerceService, MediaService,
-    MediaSubscriptionService, QuotaService,
+    get_env_var, init_jwks_verifier, CommerceService, CredentialsService,
+    MediaService, MediaSubscriptionService, PaymentService, QuotaService,
 };
 
 #[tokio::main(flavor = "current_thread")]
@@ -34,6 +34,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     migrate(&db_pool).await?;
 
+    // initialize credentials service
+    let credentials_service = CredentialsService::new(
+        get_env_var("OAUTH_URL"),
+        get_env_var("OAUTH_HOST"),
+        get_env_var("SERVICE_USER_CLIENT_ID"),
+        get_env_var("SERVICE_USER_CLIENT_SECRET"),
+    );
+
     // initialize file service
     let file_service = FileService::new(
         get_env_var("BUCKET_NAME"),
@@ -42,6 +50,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get_env_var("BUCKET_SECRET_ACCESS_KEY"),
     )
     .await;
+
+    // initialize payment service
+    let payment_service = PaymentService::init(
+        get_env_var("PAYMENT_SERVICE_URL"),
+        credentials_service,
+    )
+    .await?;
 
     let max_message_size_bytes =
         get_env_var("MAX_MESSAGE_SIZE_BYTES").parse().unwrap();
@@ -86,6 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let media_subscription_service = MediaSubscriptionService::build(
         db_pool,
         init_jwks_verifier(&jwks_host, &jwks_url)?,
+        payment_service,
     );
 
     tracing::log::info!("gRPC+web server listening on {}", host);

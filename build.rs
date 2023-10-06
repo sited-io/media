@@ -6,9 +6,10 @@ fn main() -> Result<()> {
         "service-apis/proto/peoplesmarkets/media/v1/media_subscription.proto",
     ];
 
-    const COMMERCE_PROTOS: &[&str] = &[
+    const CLIENT_PROTOS: &[&str] = &[
         "service-apis/proto/peoplesmarkets/commerce/v1/shop.proto",
         "service-apis/proto/peoplesmarkets/commerce/v1/offer.proto",
+        "service-apis/proto/peoplesmarkets/payment/v1/stripe.proto",
     ];
 
     const INCLUDES: &[&str] = &["service-apis/proto"];
@@ -18,7 +19,7 @@ fn main() -> Result<()> {
         .protoc_arg("--experimental_allow_proto3_optional")
         .build_server(false)
         .build_client(true)
-        .compile(COMMERCE_PROTOS, INCLUDES)?;
+        .compile(CLIENT_PROTOS, INCLUDES)?;
 
     tonic_build::configure()
         .out_dir("src/api")

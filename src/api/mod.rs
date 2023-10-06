@@ -14,6 +14,12 @@ pub mod peoplesmarkets {
         }
     }
 
+    pub mod payment {
+        pub mod v1 {
+            include!("peoplesmarkets.payment.v1.rs");
+        }
+    }
+
     pub mod ordering {
         pub mod v1 {
             include!("peoplesmarkets.ordering.v1.rs");

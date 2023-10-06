@@ -1063,6 +1063,32 @@ pub mod media_service_server {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MediaSubscriptionResponse {
+    #[prost(string, tag = "1")]
+    pub media_subscription_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub buyer_user_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub shop_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub offer_id: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "6")]
+    pub current_period_start: u64,
+    #[prost(uint64, tag = "7")]
+    pub current_period_end: u64,
+    #[prost(string, tag = "8")]
+    pub subscription_status: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "9")]
+    pub payed_at: u64,
+    #[prost(uint64, tag = "10")]
+    pub payed_until: u64,
+    #[prost(string, optional, tag = "11")]
+    pub stripe_subscription_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint64, optional, tag = "12")]
+    pub canceled_at: ::core::option::Option<u64>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PutMediaSubscriptionRequest {
     #[prost(string, tag = "1")]
     pub media_subscription_id: ::prost::alloc::string::String,
@@ -1080,10 +1106,64 @@ pub struct PutMediaSubscriptionRequest {
     pub payed_at: u64,
     #[prost(uint64, tag = "8")]
     pub payed_until: u64,
+    #[prost(string, tag = "9")]
+    pub shop_id: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "10")]
+    pub stripe_subscription_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint64, optional, tag = "11")]
+    pub canceled_at: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PutMediaSubscriptionResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetMediaSubscriptionRequest {
+    #[prost(string, optional, tag = "1")]
+    pub media_subscription_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "2")]
+    pub offer_id: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetMediaSubscriptionResponse {
+    #[prost(message, optional, tag = "1")]
+    pub media_subscription: ::core::option::Option<MediaSubscriptionResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ListMediaSubscriptionsRequest {
+    #[prost(string, optional, tag = "1")]
+    pub shop_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ListMediaSubscriptionsResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub media_subscriptions: ::prost::alloc::vec::Vec<MediaSubscriptionResponse>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CancelMediaSubscriptionRequest {
+    #[prost(string, tag = "1")]
+    pub media_subscription_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CancelMediaSubscriptionResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ResumeMediaSubscriptionRequest {
+    #[prost(string, tag = "1")]
+    pub media_subscription_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ResumeMediaSubscriptionResponse {}
 /// Generated server implementations.
 pub mod media_subscription_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -1096,6 +1176,34 @@ pub mod media_subscription_service_server {
             request: tonic::Request<super::PutMediaSubscriptionRequest>,
         ) -> std::result::Result<
             tonic::Response<super::PutMediaSubscriptionResponse>,
+            tonic::Status,
+        >;
+        async fn get_media_subscription(
+            &self,
+            request: tonic::Request<super::GetMediaSubscriptionRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetMediaSubscriptionResponse>,
+            tonic::Status,
+        >;
+        async fn list_media_subscriptions(
+            &self,
+            request: tonic::Request<super::ListMediaSubscriptionsRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ListMediaSubscriptionsResponse>,
+            tonic::Status,
+        >;
+        async fn cancel_media_subscription(
+            &self,
+            request: tonic::Request<super::CancelMediaSubscriptionRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::CancelMediaSubscriptionResponse>,
+            tonic::Status,
+        >;
+        async fn resume_media_subscription(
+            &self,
+            request: tonic::Request<super::ResumeMediaSubscriptionRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ResumeMediaSubscriptionResponse>,
             tonic::Status,
         >;
     }
@@ -1216,6 +1324,218 @@ pub mod media_subscription_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = PutMediaSubscriptionSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaSubscriptionService/GetMediaSubscription" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetMediaSubscriptionSvc<T: MediaSubscriptionService>(
+                        pub Arc<T>,
+                    );
+                    impl<
+                        T: MediaSubscriptionService,
+                    > tonic::server::UnaryService<super::GetMediaSubscriptionRequest>
+                    for GetMediaSubscriptionSvc<T> {
+                        type Response = super::GetMediaSubscriptionResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetMediaSubscriptionRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaSubscriptionService>::get_media_subscription(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetMediaSubscriptionSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaSubscriptionService/ListMediaSubscriptions" => {
+                    #[allow(non_camel_case_types)]
+                    struct ListMediaSubscriptionsSvc<T: MediaSubscriptionService>(
+                        pub Arc<T>,
+                    );
+                    impl<
+                        T: MediaSubscriptionService,
+                    > tonic::server::UnaryService<super::ListMediaSubscriptionsRequest>
+                    for ListMediaSubscriptionsSvc<T> {
+                        type Response = super::ListMediaSubscriptionsResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::ListMediaSubscriptionsRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaSubscriptionService>::list_media_subscriptions(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ListMediaSubscriptionsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaSubscriptionService/CancelMediaSubscription" => {
+                    #[allow(non_camel_case_types)]
+                    struct CancelMediaSubscriptionSvc<T: MediaSubscriptionService>(
+                        pub Arc<T>,
+                    );
+                    impl<
+                        T: MediaSubscriptionService,
+                    > tonic::server::UnaryService<super::CancelMediaSubscriptionRequest>
+                    for CancelMediaSubscriptionSvc<T> {
+                        type Response = super::CancelMediaSubscriptionResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                super::CancelMediaSubscriptionRequest,
+                            >,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaSubscriptionService>::cancel_media_subscription(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = CancelMediaSubscriptionSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/peoplesmarkets.media.v1.MediaSubscriptionService/ResumeMediaSubscription" => {
+                    #[allow(non_camel_case_types)]
+                    struct ResumeMediaSubscriptionSvc<T: MediaSubscriptionService>(
+                        pub Arc<T>,
+                    );
+                    impl<
+                        T: MediaSubscriptionService,
+                    > tonic::server::UnaryService<super::ResumeMediaSubscriptionRequest>
+                    for ResumeMediaSubscriptionSvc<T> {
+                        type Response = super::ResumeMediaSubscriptionResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                super::ResumeMediaSubscriptionRequest,
+                            >,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MediaSubscriptionService>::resume_media_subscription(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ResumeMediaSubscriptionSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
