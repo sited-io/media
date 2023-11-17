@@ -392,12 +392,11 @@ impl media_service_server::MediaService for MediaService {
                 .await?;
 
         if self.quota_service.check_quota(&user_id).await.is_err() {
-            Media::update(&self.pool, &media_uuid, &user_id, None, Some(0))
-                .await?;
-
             self.file_service
                 .abort_multipart_upload(&found_media.data_url, &upload_id)
                 .await?;
+
+            Media::delete(&self.pool, &media_uuid, &user_id).await?;
 
             return Err(Status::aborted("quota reached"));
         }

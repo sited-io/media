@@ -378,6 +378,24 @@ impl Media {
         Ok(Self::from(row))
     }
 
+    pub async fn delete(
+        pool: &Pool,
+        media_id: &Uuid,
+        user_id: &String,
+    ) -> Result<(), DbError> {
+        let conn = pool.get().await?;
+
+        let (sql, values) = Query::delete()
+            .from_table(MediaIden::Table)
+            .and_where(Expr::col(MediaIden::MediaId).eq(*media_id))
+            .and_where(Expr::col(MediaIden::UserId).eq(user_id))
+            .build_postgres(PostgresQueryBuilder);
+
+        conn.execute(sql.as_str(), &values.as_params()).await?;
+
+        Ok(())
+    }
+
     pub async fn begin_delete<'a>(
         transaction: &Transaction<'a>,
         media_id: &Uuid,
