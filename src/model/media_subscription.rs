@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::Pool;
 use sea_query::{
-    Asterisk, Expr, Iden, OnConflict, PostgresQueryBuilder, Query,
+    any, Asterisk, Expr, Iden, OnConflict, PostgresQueryBuilder, Query,
 };
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
@@ -122,20 +122,26 @@ impl MediaSubscription {
             query
                 .column(Asterisk)
                 .from(MediaSubscriptionIden::Table)
-                .and_where(
+                .cond_where(
                     Expr::col(MediaSubscriptionIden::BuyerUserId)
                         .eq(buyer_user_id),
-                );
+                )
+                .cond_where(any![
+                    Expr::col(MediaSubscriptionIden::SubscriptionStatus)
+                        .eq("active"),
+                    Expr::col(MediaSubscriptionIden::SubscriptionStatus)
+                        .eq("trialing")
+                ]);
 
             if let Some(media_subscription_id) = media_subscription_id {
-                query.and_where(
+                query.cond_where(
                     Expr::col(MediaSubscriptionIden::MediaSubscriptionId)
                         .eq(media_subscription_id),
                 );
             }
 
             if let Some(offer_id) = offer_id {
-                query.and_where(
+                query.cond_where(
                     Expr::col(MediaSubscriptionIden::OfferId).eq(offer_id),
                 );
             }

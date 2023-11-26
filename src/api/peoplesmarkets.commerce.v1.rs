@@ -493,6 +493,10 @@ pub struct ShopResponse {
     pub customization: ::core::option::Option<ShopCustomizationResponse>,
     #[prost(bool, tag = "12")]
     pub is_active: bool,
+    #[prost(string, optional, tag = "13")]
+    pub contact_email_address: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "14")]
+    pub client_id: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -525,6 +529,24 @@ pub struct GetShopRequest {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetShopResponse {
+    #[prost(message, optional, tag = "1")]
+    pub shop: ::core::option::Option<ShopResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetMyShopRequest {
+    #[prost(string, optional, tag = "1")]
+    pub shop_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "2")]
+    pub slug: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "3")]
+    pub domain: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bool, optional, tag = "4")]
+    pub extended: ::core::option::Option<bool>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetMyShopResponse {
     #[prost(message, optional, tag = "1")]
     pub shop: ::core::option::Option<ShopResponse>,
 }
@@ -607,6 +629,8 @@ pub struct UpdateShopRequest {
     pub minimum_platform_fee_cent: ::core::option::Option<u32>,
     #[prost(bool, optional, tag = "7")]
     pub is_active: ::core::option::Option<bool>,
+    #[prost(string, optional, tag = "8")]
+    pub contact_email_address: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -890,6 +914,36 @@ pub mod shop_service_client {
                     GrpcMethod::new(
                         "peoplesmarkets.commerce.v1.ShopService",
                         "GetShopByDomain",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_my_shop(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetMyShopRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetMyShopResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.ShopService/GetMyShop",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.ShopService",
+                        "GetMyShop",
                     ),
                 );
             self.inner.unary(req, path, codec).await
@@ -1204,6 +1258,18 @@ pub struct GetOfferResponse {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetMyOfferRequest {
+    #[prost(string, tag = "1")]
+    pub offer_id: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetMyOfferResponse {
+    #[prost(message, optional, tag = "1")]
+    pub offer: ::core::option::Option<OfferResponse>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct OffersOrderBy {
     #[prost(enumeration = "OffersOrderByField", tag = "1")]
     pub field: i32,
@@ -1226,7 +1292,9 @@ pub struct ListOffersRequest {
     #[prost(string, optional, tag = "2")]
     pub shop_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    pub pagination: ::core::option::Option<
+        super::super::pagination::v1::PaginationRequest,
+    >,
     #[prost(message, optional, tag = "4")]
     pub order_by: ::core::option::Option<OffersOrderBy>,
     #[prost(message, optional, tag = "5")]
@@ -1238,7 +1306,9 @@ pub struct ListOffersResponse {
     #[prost(message, repeated, tag = "1")]
     pub offers: ::prost::alloc::vec::Vec<OfferResponse>,
     #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    pub pagination: ::core::option::Option<
+        super::super::pagination::v1::PaginationResponse,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1561,6 +1631,36 @@ pub mod offer_service_client {
                     GrpcMethod::new(
                         "peoplesmarkets.commerce.v1.OfferService",
                         "GetOffer",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_my_offer(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetMyOfferRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetMyOfferResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/peoplesmarkets.commerce.v1.OfferService/GetMyOffer",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "peoplesmarkets.commerce.v1.OfferService",
+                        "GetMyOffer",
                     ),
                 );
             self.inner.unary(req, path, codec).await
