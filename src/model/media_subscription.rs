@@ -169,13 +169,19 @@ impl MediaSubscription {
             query
                 .column(Asterisk)
                 .from(MediaSubscriptionIden::Table)
-                .and_where(
+                .cond_where(
                     Expr::col(MediaSubscriptionIden::BuyerUserId)
                         .eq(buyer_user_id),
-                );
+                )
+                .cond_where(any![
+                    Expr::col(MediaSubscriptionIden::SubscriptionStatus)
+                        .eq("active"),
+                    Expr::col(MediaSubscriptionIden::SubscriptionStatus)
+                        .eq("trialing")
+                ]);
 
             if let Some(shop_id) = shop_id {
-                query.and_where(
+                query.cond_where(
                     Expr::col(MediaSubscriptionIden::ShopId).eq(shop_id),
                 );
             }
