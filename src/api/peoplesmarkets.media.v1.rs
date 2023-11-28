@@ -15,6 +15,8 @@ pub struct MediaResponse {
     pub updated_at: i64,
     #[prost(string, tag = "7")]
     pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub file_name: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

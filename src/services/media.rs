@@ -83,6 +83,7 @@ impl MediaService {
             created_at: media.created_at.timestamp(),
             updated_at: media.updated_at.timestamp(),
             name: media.name,
+            file_name: media.file_name,
         }
     }
 
