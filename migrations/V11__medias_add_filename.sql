@@ -1,4 +1,4 @@
 ALTER TABLE
   medias
 ADD
-  COLUMN file_name VARCHAR DEFAULT "";
+  COLUMN file_name VARCHAR DEFAULT '';
