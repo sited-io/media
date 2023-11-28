@@ -30,6 +30,7 @@ pub enum MediaIden {
     Name,
     DataUrl,
     SizeBytes,
+    FileName,
 }
 
 #[derive(Debug, Clone)]
@@ -43,6 +44,7 @@ pub struct Media {
     pub name: String,
     pub data_url: String,
     pub size_bytes: u64,
+    pub file_name: String,
 }
 
 impl Media {
@@ -155,6 +157,7 @@ impl Media {
         name: &String,
         file_path: &String,
         size_bytes: i64,
+        file_name: &String,
     ) -> Result<Self, DbError> {
         let (sql, values) = Query::insert()
             .into_table(MediaIden::Table)
@@ -165,6 +168,7 @@ impl Media {
                 MediaIden::Name,
                 MediaIden::DataUrl,
                 MediaIden::SizeBytes,
+                MediaIden::FileName,
             ])
             .values([
                 (*media_id).into(),
@@ -173,6 +177,7 @@ impl Media {
                 name.into(),
                 file_path.into(),
                 size_bytes.into(),
+                file_name.into(),
             ])?
             .returning_all()
             .build_postgres(PostgresQueryBuilder);
@@ -430,6 +435,7 @@ impl From<&Row> for Media {
                 row.get::<&str, i64>(MediaIden::SizeBytes.to_string().as_str()),
             )
             .expect("should fit"),
+            file_name: row.get(MediaIden::FileName.to_string().as_str()),
         }
     }
 }

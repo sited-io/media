@@ -33,6 +33,8 @@ pub struct CreateMediaRequest {
     pub name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "3")]
     pub file: ::core::option::Option<MediaUpload>,
+    #[prost(string, tag = "4")]
+    pub file_name: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

@@ -31,8 +31,9 @@ impl CommerceService {
         let mut client = self.shop_client.clone();
 
         let mut request = Request::new(GetShopRequest {
-            shop_id: shop_id.to_owned(),
+            shop_id: Some(shop_id.to_owned()),
             extended: None,
+            ..Default::default()
         });
 
         if let Some(auth_header) = metadata.get(AUTHORIZATION.as_str()) {

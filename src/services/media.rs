@@ -109,6 +109,7 @@ impl media_service_server::MediaService for MediaService {
             shop_id,
             name,
             file,
+            file_name,
         } = request.into_inner();
 
         let shop_uuid = parse_uuid(&shop_id, "shop_id")?;
@@ -141,6 +142,7 @@ impl media_service_server::MediaService for MediaService {
             &name,
             &file_path,
             size,
+            &file_name,
         )
         .await?;
 
@@ -198,7 +200,7 @@ impl media_service_server::MediaService for MediaService {
 
         let download_url = self
             .file_service
-            .get_presigned_url(&file_path, &found_media.name)
+            .get_presigned_url(&file_path, &found_media.file_name)
             .await?;
 
         Ok(Response::new(DownloadMediaResponse { download_url }))
