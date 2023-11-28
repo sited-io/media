@@ -288,6 +288,7 @@ impl media_service_server::MediaService for MediaService {
             media_id,
             name,
             file,
+            file_name,
         } = request.into_inner();
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
@@ -300,9 +301,15 @@ impl media_service_server::MediaService for MediaService {
         let new_size =
             file.as_ref().and_then(|f| i64::try_from(f.data.len()).ok());
 
-        let updated_media =
-            Media::update(&self.pool, &media_uuid, &user_id, name, new_size)
-                .await?;
+        let updated_media = Media::update(
+            &self.pool,
+            &media_uuid,
+            &user_id,
+            name,
+            new_size,
+            file_name,
+        )
+        .await?;
 
         if let Some(file) = file {
             self.file_service

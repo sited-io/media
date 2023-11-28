@@ -332,6 +332,7 @@ impl Media {
         user_id: &String,
         name: Option<String>,
         size_bytes: Option<i64>,
+        file_name: Option<String>,
     ) -> Result<Self, DbError> {
         let client = pool.get().await?;
 
@@ -345,6 +346,10 @@ impl Media {
 
             if let Some(size_bytes) = size_bytes {
                 query.value(MediaIden::SizeBytes, size_bytes);
+            }
+
+            if let Some(file_name) = file_name {
+                query.value(MediaIden::FileName, file_name);
             }
 
             query

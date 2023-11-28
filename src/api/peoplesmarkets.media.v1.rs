@@ -129,6 +129,8 @@ pub struct UpdateMediaRequest {
     pub name: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub file: ::core::option::Option<MediaUpload>,
+    #[prost(string, optional, tag = "4")]
+    pub file_name: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
