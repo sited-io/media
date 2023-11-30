@@ -45,15 +45,18 @@ impl CommerceService {
         let shop = client
             .get_shop(request)
             .await
-            .map_err(|_| Status::not_found("shop"))?
+            .map_err(|err| {
+                tracing::error!("{}", err);
+                Status::not_found("shop")
+            })?
             .into_inner()
             .shop
-            .ok_or_else(|| Status::not_found("shop"))?;
+            .ok_or_else(|| Status::not_found("shop response was empty"))?;
 
         if shop.user_id == *user_id {
             Ok(())
         } else {
-            Err(Status::not_found("shop"))
+            Err(Status::not_found("user is not owner of this shop"))
         }
     }
 
@@ -78,15 +81,18 @@ impl CommerceService {
         let offer = client
             .get_offer(request)
             .await
-            .map_err(|_| Status::not_found("offer"))?
+            .map_err(|err| {
+                tracing::error!("{}", err);
+                Status::not_found("offer")
+            })?
             .into_inner()
             .offer
-            .ok_or_else(|| Status::not_found("offer"))?;
+            .ok_or_else(|| Status::not_found("offer response was empty"))?;
 
         if offer.user_id == *user_id {
             Ok(())
         } else {
-            Err(Status::not_found("offer"))
+            Err(Status::not_found("user is not owner of this offer"))
         }
     }
 }
