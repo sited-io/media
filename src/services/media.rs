@@ -17,6 +17,7 @@ use crate::api::peoplesmarkets::media::v1::{
     ListAccessibleMediaResponse, ListMediaRequest, ListMediaResponse,
     MediaResponse, Part, PutMultipartChunkRequest, PutMultipartChunkResponse,
     RemoveMediaFromOfferRequest, RemoveMediaFromOfferResponse,
+    UpdateMediaOfferOrderingRequest, UpdateMediaOfferOrderingResponse,
     UpdateMediaRequest, UpdateMediaResponse,
 };
 use crate::auth::get_user_id;
@@ -84,6 +85,7 @@ impl MediaService {
             updated_at: media.updated_at.timestamp(),
             name: media.name,
             file_name: media.file_name,
+            ordering: media.ordering,
         }
     }
 
@@ -470,24 +472,66 @@ impl media_service_server::MediaService for MediaService {
 
         let user_id = get_user_id(&metadata, &self.verifier).await?;
 
-        let AddMediaToOfferRequest { media_id, offer_id } =
-            request.into_inner();
+        let AddMediaToOfferRequest {
+            media_id,
+            offer_id,
+            ordering,
+        } = request.into_inner();
 
         let media_uuid = parse_uuid(&media_id, "media_id")?;
         let offer_uuid = parse_uuid(&offer_id, "media_id")?;
 
+        // Check if user is owner of the offer
         self.commerce_service
             .check_offer_and_owner(&offer_id, &user_id, &metadata)
             .await?;
 
+        // Check if user is owner of media
         Media::get_for_owner(&self.pool, &media_uuid, &user_id)
             .await?
             .ok_or(Status::not_found(media_id))?;
 
-        MediaOffer::create(&self.pool, &media_uuid, &offer_uuid, &user_id)
+        let ord = match ordering {
+            Some(o) => o,
+            None => {
+                let highest = MediaOffer::get_highest_ordering(
+                    &self.pool,
+                    &offer_uuid,
+                    &user_id,
+                )
+                .await?;
+
+                highest + 1
+            }
+        };
+
+        MediaOffer::create(&self.pool, &media_uuid, &offer_uuid, &user_id, ord)
             .await?;
 
         Ok(Response::new(AddMediaToOfferResponse {}))
+    }
+
+    async fn update_media_offer_ordering(
+        &self,
+        request: Request<UpdateMediaOfferOrderingRequest>,
+    ) -> Result<Response<UpdateMediaOfferOrderingResponse>, Status> {
+        let user_id = get_user_id(request.metadata(), &self.verifier).await?;
+
+        let UpdateMediaOfferOrderingRequest {
+            media_id,
+            offer_id,
+            ordering,
+        } = request.into_inner();
+
+        let media_id = parse_uuid(&media_id, "media_id")?;
+        let offer_id = parse_uuid(&offer_id, "offer_id")?;
+
+        MediaOffer::update_ordering(
+            &self.pool, &media_id, &offer_id, &user_id, ordering,
+        )
+        .await?;
+
+        Ok(Response::new(UpdateMediaOfferOrderingResponse {}))
     }
 
     async fn remove_media_from_offer(

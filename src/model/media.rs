@@ -2,8 +2,8 @@ use chrono::{DateTime, Utc};
 use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::{Pool, Transaction};
 use sea_query::{
-    Alias, Asterisk, Expr, Iden, Order, PostgresQueryBuilder, Query,
-    SelectStatement,
+    Alias, Asterisk, Expr, Iden, IntoColumnRef, Order, PostgresQueryBuilder,
+    Query, SelectStatement,
 };
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
@@ -14,7 +14,7 @@ use crate::api::peoplesmarkets::media::v1::{
 use crate::api::peoplesmarkets::ordering::v1::Direction;
 use crate::db::DbError;
 
-use super::media_offer::MediaOfferIden;
+use super::media_offer::{MediaOfferIden, MediaOffersVec};
 use super::media_subscription::MediaSubscriptionIden;
 use super::MediaOffer;
 
@@ -45,26 +45,31 @@ pub struct Media {
     pub data_url: String,
     pub size_bytes: u64,
     pub file_name: String,
+    pub ordering: i64,
 }
 
 impl Media {
-    const OFFER_IDS_ALIAS: &str = "offer_ids";
+    const MEDIA_OFFERS_ALIAS: &str = "offers";
 
-    fn get_offer_ids_alias() -> Alias {
-        Alias::new(Self::OFFER_IDS_ALIAS)
+    fn get_media_offers_alias() -> Alias {
+        Alias::new(Self::MEDIA_OFFERS_ALIAS)
     }
 
     fn select_with_offer_ids() -> SelectStatement {
         Query::select()
             .column((MediaIden::Table, Asterisk))
-            .expr_as(MediaOffer::get_agg(), Self::get_offer_ids_alias())
+            .expr_as(MediaOffer::get_agg(), Self::get_media_offers_alias())
             .from(MediaIden::Table)
             .left_join(
                 MediaOfferIden::Table,
                 Expr::col((MediaIden::Table, MediaIden::MediaId))
                     .equals((MediaOfferIden::Table, MediaOfferIden::MediaId)),
             )
-            .group_by_col((MediaIden::Table, MediaIden::MediaId))
+            .group_by_columns([
+                (MediaIden::Table, MediaIden::MediaId).into_column_ref(),
+                (MediaOfferIden::Table, MediaOfferIden::Ordering)
+                    .into_column_ref(),
+            ])
             .to_owned()
     }
 
@@ -145,6 +150,12 @@ impl Media {
             }
             UpdatedAt => {
                 query.order_by((MediaIden::Table, MediaIden::UpdatedAt), order);
+            }
+            Ordering => {
+                query.order_by(
+                    (MediaOfferIden::Table, MediaOfferIden::Ordering),
+                    order,
+                );
             }
         }
     }
@@ -427,9 +438,14 @@ impl Media {
 
 impl From<&Row> for Media {
     fn from(row: &Row) -> Self {
+        let media_offers: Option<MediaOffersVec> =
+            row.try_get(Self::MEDIA_OFFERS_ALIAS).ok();
+
         Self {
             media_id: row.get(MediaIden::MediaId.to_string().as_str()),
-            offer_ids: row.try_get(Self::OFFER_IDS_ALIAS).ok(),
+            offer_ids: media_offers
+                .clone()
+                .map(|mo| mo.0.into_iter().map(|m| m.offer_id).collect()),
             shop_id: row.get(MediaIden::ShopId.to_string().as_str()),
             user_id: row.get(MediaIden::UserId.to_string().as_str()),
             created_at: row.get(MediaIden::CreatedAt.to_string().as_str()),
@@ -441,6 +457,9 @@ impl From<&Row> for Media {
             )
             .expect("should fit"),
             file_name: row.get(MediaIden::FileName.to_string().as_str()),
+            ordering: media_offers
+                .and_then(|mo| mo.0.first().map(|m| m.ordering))
+                .unwrap_or(0),
         }
     }
 }

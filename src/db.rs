@@ -1,10 +1,12 @@
 use std::ops::DerefMut;
 
 use deadpool_postgres::tokio_postgres::error::SqlState;
+use deadpool_postgres::tokio_postgres::types::{FromSql, Type, WrongType};
 use deadpool_postgres::{
     tokio_postgres::NoTls, Config, CreatePoolError, Pool, PoolError, Runtime,
     SslMode,
 };
+
 use refinery::Target;
 use sea_query::Iden;
 use tonic::Status;
@@ -141,5 +143,24 @@ pub struct ArrayAgg;
 impl Iden for ArrayAgg {
     fn unquoted(&self, s: &mut dyn std::fmt::Write) {
         write!(s, "ARRAY_AGG").unwrap()
+    }
+}
+
+pub fn get_type_from_oid<'a, T>(
+    oid: i32,
+) -> Result<Type, Box<dyn std::error::Error + Sync + Send>>
+where
+    T: FromSql<'a>,
+{
+    match Type::from_oid(oid as u32) {
+        None => Err(format!(
+            "cannot decode OID {} inside of anonymous record",
+            oid,
+        )
+        .into()),
+        Some(ty) if !T::accepts(&ty) => {
+            Err(Box::new(WrongType::new::<T>(ty.clone())))
+        }
+        Some(ty) => Ok(ty),
     }
 }

@@ -18,6 +18,7 @@ chrono = { version = "0.4.31", default-features = false, features = ["clock"] }
 deadpool-postgres = { version = "0.10.5", default-features = false, features = [
   "rt_tokio_1",
 ] }
+fallible-iterator = "0.2.0"
 http = { version = "0.2.9", default-features = false }
 jwtk = { version = "0.3.0", default-features = false, features = [
   "remote-jwks",
@@ -25,6 +26,7 @@ jwtk = { version = "0.3.0", default-features = false, features = [
 openssl = { version = "0.10.57", default-features = false, features = [
   "vendored",
 ] }
+postgres-protocol = "0.6.6"
 prost = { version = "0.12.0", default-features = false }
 refinery = { version = "0.8.10", default-features = false, features = [
   "tokio-postgres",
