@@ -26,6 +26,7 @@ pub enum MediaSubscriptionIden {
     UpdatedAt,
     StripeSubscriptionId,
     CanceledAt,
+    CancelAt,
 }
 
 #[derive(Debug, Clone)]
@@ -43,10 +44,11 @@ pub struct MediaSubscription {
     pub updated_at: DateTime<Utc>,
     pub stripe_subscription_id: Option<String>,
     pub canceled_at: Option<DateTime<Utc>>,
+    pub cancel_at: Option<DateTime<Utc>>,
 }
 
 impl MediaSubscription {
-    const PUT_COLUMNS: [MediaSubscriptionIden; 11] = [
+    const PUT_COLUMNS: [MediaSubscriptionIden; 12] = [
         MediaSubscriptionIden::MediaSubscriptionId,
         MediaSubscriptionIden::BuyerUserId,
         MediaSubscriptionIden::OfferId,
@@ -58,6 +60,7 @@ impl MediaSubscription {
         MediaSubscriptionIden::PayedUntil,
         MediaSubscriptionIden::StripeSubscriptionId,
         MediaSubscriptionIden::CanceledAt,
+        MediaSubscriptionIden::CancelAt,
     ];
 
     #[allow(clippy::too_many_arguments)]
@@ -74,6 +77,7 @@ impl MediaSubscription {
         payed_until: &DateTime<Utc>,
         stripe_subscription_id: Option<String>,
         canceled_at: Option<DateTime<Utc>>,
+        cancel_at: Option<DateTime<Utc>>,
     ) -> Result<Self, DbError> {
         let conn = pool.get().await?;
 
@@ -92,6 +96,7 @@ impl MediaSubscription {
                 (*payed_until).into(),
                 stripe_subscription_id.into(),
                 canceled_at.into(),
+                cancel_at.into(),
             ])?
             .on_conflict(
                 OnConflict::column(MediaSubscriptionIden::MediaSubscriptionId)
@@ -248,6 +253,8 @@ impl From<&Row> for MediaSubscription {
             ),
             canceled_at: row
                 .get(MediaSubscriptionIden::CanceledAt.to_string().as_str()),
+            cancel_at: row
+                .get(MediaSubscriptionIden::CancelAt.to_string().as_str()),
         }
     }
 }

@@ -100,7 +100,7 @@ impl MediaOffer {
             0
         };
 
-        return Ok(ordering);
+        Ok(ordering)
     }
 
     pub async fn update_ordering(

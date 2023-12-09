@@ -160,6 +160,7 @@ impl Media {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn create<'a>(
         transaction: &Transaction<'a>,
         media_id: &Uuid,

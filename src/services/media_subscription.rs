@@ -72,6 +72,9 @@ impl MediaSubscriptionService {
             canceled_at: media_subscription
                 .canceled_at
                 .map(|c| u64::try_from(c.timestamp()).unwrap()),
+            cancel_at: media_subscription
+                .cancel_at
+                .map(|c| u64::try_from(c.timestamp()).unwrap()),
         }
     }
 
@@ -107,6 +110,7 @@ impl media_subscription_service_server::MediaSubscriptionService
             payed_until,
             stripe_subscription_id,
             canceled_at,
+            cancel_at,
         } = request.into_inner();
 
         MediaSubscription::put(
@@ -122,6 +126,7 @@ impl media_subscription_service_server::MediaSubscriptionService
             &Self::timestamp_to_datetime(payed_until)?,
             stripe_subscription_id,
             canceled_at.and_then(|c| Self::timestamp_to_datetime(c).ok()),
+            cancel_at.and_then(|c| Self::timestamp_to_datetime(c).ok()),
         )
         .await?;
 
