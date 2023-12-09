@@ -246,7 +246,10 @@ impl media_subscription_service_server::MediaSubscriptionService
             None,
         )
         .await?
-        .ok_or(Status::not_found(""))?;
+        .ok_or(Status::not_found(format!(
+            "media_subscription_id {}",
+            media_subscription_id
+        )))?;
 
         if let Some(stripe_subscription_id) =
             found_media_subscritpion.stripe_subscription_id
