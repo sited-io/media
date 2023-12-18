@@ -48,6 +48,12 @@ job "media" {
     task "media-api" {
       driver = "docker"
 
+      resources {
+        cpu        = 100
+        memory     = 256
+        memory_max = 256
+      }
+
       vault {
         policies = ["service-media"]
       }
