@@ -175,6 +175,7 @@ impl media_subscription_service_server::MediaSubscriptionService
         let ListMediaSubscriptionsRequest {
             shop_id,
             pagination,
+            is_accessible,
         } = request.into_inner();
 
         let shop_uuid = parse_optional_uuid(shop_id, "shop_id")?;
@@ -182,7 +183,12 @@ impl media_subscription_service_server::MediaSubscriptionService
         let (limit, offset, pagination) = paginate(pagination)?;
 
         let found_media_subscriptions = MediaSubscription::list(
-            &self.pool, &user_id, shop_uuid, limit, offset,
+            &self.pool,
+            &user_id,
+            shop_uuid,
+            is_accessible,
+            limit,
+            offset,
         )
         .await?;
 

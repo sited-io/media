@@ -1,3 +1,5 @@
+use std::convert::identity;
+
 use chrono::{DateTime, Utc};
 use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::Pool;
@@ -171,6 +173,7 @@ impl MediaSubscription {
         pool: &Pool,
         buyer_user_id: &String,
         shop_id: Option<Uuid>,
+        is_accessible: Option<bool>,
         limit: u64,
         offset: u64,
     ) -> Result<Vec<Self>, DbError> {
@@ -196,6 +199,16 @@ impl MediaSubscription {
             if let Some(shop_id) = shop_id {
                 query.cond_where(
                     Expr::col(MediaSubscriptionIden::ShopId).eq(shop_id),
+                );
+            }
+
+            if is_accessible.is_some_and(identity) {
+                query.cond_where(
+                    Expr::col((
+                        MediaSubscriptionIden::Table,
+                        MediaSubscriptionIden::PayedUntil,
+                    ))
+                    .gte(Utc::now()),
                 );
             }
 
