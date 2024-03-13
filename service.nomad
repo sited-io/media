@@ -3,7 +3,7 @@ job "media" {
   type        = "service"
 
   group "media-api" {
-    count = 2
+    count = 1
 
     network {
       mode = "bridge"
