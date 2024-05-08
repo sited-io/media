@@ -37,7 +37,7 @@ fn parse_optional_uuid(
 fn paginate(
     request: Option<Pagination>,
 ) -> Result<(u64, u64, Pagination), Status> {
-    let mut limit = 10;
+    let mut limit = 100;
     let mut offset = 0;
     let mut pagination = Pagination {
         page: 1,
