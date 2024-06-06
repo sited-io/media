@@ -110,7 +110,9 @@ pub struct ListMediaResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListAccessibleMediaRequest {
     #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    pub pagination: ::core::option::Option<
+        super::super::pagination::v1::PaginationRequest,
+    >,
     #[prost(message, optional, tag = "3")]
     pub order_by: ::core::option::Option<MediaOrderBy>,
     #[prost(message, optional, tag = "4")]
@@ -122,7 +124,9 @@ pub struct ListAccessibleMediaResponse {
     #[prost(message, repeated, tag = "1")]
     pub medias: ::prost::alloc::vec::Vec<MediaResponse>,
     #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    pub pagination: ::core::option::Option<
+        super::super::pagination::v1::PaginationResponse,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1225,7 +1229,9 @@ pub struct ListMediaSubscriptionsRequest {
     #[prost(string, optional, tag = "1")]
     pub shop_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    pub pagination: ::core::option::Option<
+        super::super::pagination::v1::PaginationRequest,
+    >,
     #[prost(bool, optional, tag = "3")]
     pub is_accessible: ::core::option::Option<bool>,
 }
@@ -1235,7 +1241,9 @@ pub struct ListMediaSubscriptionsResponse {
     #[prost(message, repeated, tag = "1")]
     pub media_subscriptions: ::prost::alloc::vec::Vec<MediaSubscriptionResponse>,
     #[prost(message, optional, tag = "2")]
-    pub pagination: ::core::option::Option<super::super::pagination::v1::Pagination>,
+    pub pagination: ::core::option::Option<
+        super::super::pagination::v1::PaginationResponse,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

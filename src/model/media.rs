@@ -12,7 +12,7 @@ use crate::api::peoplesmarkets::media::v1::{
     MediaFilterField, MediaOrderByField,
 };
 use crate::api::peoplesmarkets::ordering::v1::Direction;
-use crate::db::DbError;
+use crate::db::{get_count_from_rows, DbError};
 
 use super::media_offer::{MediaOfferIden, MediaOffersVec};
 use super::media_subscription::MediaSubscriptionIden;
@@ -49,7 +49,7 @@ pub struct Media {
 }
 
 impl Media {
-    const MEDIA_OFFERS_ALIAS: &str = "offers";
+    const MEDIA_OFFERS_ALIAS: &'static str = "offers";
 
     fn get_media_offers_alias() -> Alias {
         Alias::new(Self::MEDIA_OFFERS_ALIAS)
@@ -75,7 +75,6 @@ impl Media {
 
     fn select_accessible(user_id: &String) -> SelectStatement {
         Query::select()
-            .column((MediaIden::Table, Asterisk))
             .from(MediaIden::Table)
             .left_join(
                 MediaOfferIden::Table,
@@ -111,23 +110,27 @@ impl Media {
         query: &mut SelectStatement,
         filter_field: MediaFilterField,
         filter_query: String,
-    ) {
+    ) -> Result<(), DbError> {
         use MediaFilterField::*;
 
         match filter_field {
-            Unspecified => {}
+            Unspecified => Ok(()),
             Name => {
                 query.and_where(
                     Expr::col((MediaIden::Table, MediaIden::Name))
                         .eq(filter_query),
                 );
+                Ok(())
             }
             OfferId => {
-                let offer_id: Uuid = filter_query.parse().unwrap();
+                let offer_id: Uuid = filter_query
+                    .parse()
+                    .map_err(|err| DbError::Other(Some(format!("{}", err))))?;
                 query.and_where(
                     Expr::col((MediaOfferIden::Table, MediaOfferIden::OfferId))
                         .eq(offer_id),
                 );
+                Ok(())
             }
         }
     }
@@ -228,6 +231,7 @@ impl Media {
         let conn = pool.get().await?;
 
         let (sql, values) = Self::select_accessible(user_id)
+            .column((MediaIden::Table, Asterisk))
             .and_where(
                 Expr::col((MediaIden::Table, MediaIden::MediaId)).eq(*media_id),
             )
@@ -263,7 +267,7 @@ impl Media {
                 );
 
             if let Some((filter_field, filter_query)) = filter {
-                Self::add_filter(&mut query, filter_field, filter_query);
+                Self::add_filter(&mut query, filter_field, filter_query)?;
             }
 
             if let Some((order_by_field, order_by_direction)) = order_by {
@@ -309,15 +313,18 @@ impl Media {
         offset: u64,
         filter: Option<(MediaFilterField, String)>,
         order_by: Option<(MediaOrderByField, Direction)>,
-    ) -> Result<Vec<Self>, DbError> {
-        let conn = pool.get().await?;
+    ) -> Result<(Vec<Self>, i64), DbError> {
+        let mut conn = pool.get().await?;
+        let transaction = conn.transaction().await?;
 
-        let (sql, values) = {
+        let ((sql, values), (count_sql, count_values)) = {
             let mut query = Self::select_accessible(user_id);
 
             if let Some((filter_field, filter_query)) = filter {
-                Self::add_filter(&mut query, filter_field, filter_query);
+                Self::add_filter(&mut query, filter_field, filter_query)?;
             }
+
+            let mut count_query = query.clone();
 
             if let Some((order_by_field, order_by_direction)) = order_by {
                 Self::add_order_by(
@@ -327,15 +334,28 @@ impl Media {
                 );
             }
 
-            query
-                .limit(limit)
-                .offset(offset)
-                .build_postgres(PostgresQueryBuilder)
+            (
+                query
+                    .clone()
+                    .column((MediaIden::Table, Asterisk))
+                    .limit(limit)
+                    .offset(offset)
+                    .build_postgres(PostgresQueryBuilder),
+                count_query
+                    .expr(Expr::col((MediaIden::Table, Asterisk)).count())
+                    .build_postgres(PostgresQueryBuilder),
+            )
         };
 
-        let rows = conn.query(sql.as_str(), &values.as_params()).await?;
+        let rows = transaction.query(sql.as_str(), &values.as_params()).await?;
+        let count_rows = transaction
+            .query(count_sql.as_str(), &count_values.as_params())
+            .await?;
+        transaction.commit().await?;
 
-        Ok(rows.iter().map(Self::from).collect())
+        let count = get_count_from_rows(&count_rows);
+
+        Ok((rows.iter().map(Self::from).collect(), count))
     }
 
     pub async fn update(

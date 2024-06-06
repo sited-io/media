@@ -31,6 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get_env_var("DB_USER"),
         get_env_var("DB_PASSWORD"),
         get_env_var("DB_DBNAME"),
+        std::env::var("DB_ROOT_CERT").ok(),
     )?;
     migrate(&db_pool).await?;
 
@@ -122,6 +123,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     HeaderName::from_static("grpc-status"),
                     HeaderName::from_static("grpc-message"),
                     HeaderName::from_static("x-grpc-web"),
+                    HeaderName::from_static("x-user-agent"),
                 ])
                 .allow_methods([Method::POST])
                 .allow_origin(AllowOrigin::any())

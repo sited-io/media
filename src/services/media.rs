@@ -26,7 +26,7 @@ use crate::files::FileService;
 use crate::model::{Media, MediaOffer};
 use crate::{CommerceService, QuotaService};
 
-use super::{paginate, parse_uuid};
+use super::{get_limit_offset_from_pagination, paginate, parse_uuid};
 
 pub struct MediaService {
     pool: Pool,
@@ -256,21 +256,31 @@ impl media_service_server::MediaService for MediaService {
             filter,
         } = request.into_inner();
 
-        let (limit, offset, pagination) = paginate(pagination)?;
+        let (limit, offset, mut pagination) =
+            get_limit_offset_from_pagination(pagination)?;
 
         let filter = filter.map(|f| (f.field(), f.query));
 
         let order_by = order_by.map(|o| (o.field(), o.direction()));
 
-        let found_medias = match user_id {
+        let (found_medias, count) = match user_id {
             Ok(user_id) => {
                 Media::list_accessible(
-                    &self.pool, &user_id, limit, offset, filter, order_by,
+                    &self.pool,
+                    &user_id,
+                    limit.into(),
+                    offset.into(),
+                    filter,
+                    order_by,
                 )
                 .await?
             }
-            Err(_) => vec![],
+            Err(_) => (vec![], 0),
         };
+
+        pagination.total_elements = count.try_into().map_err(|_| {
+            Status::internal("Could not convert 'count' from i64 to u32")
+        })?;
 
         Ok(Response::new(ListAccessibleMediaResponse {
             medias: found_medias

@@ -9,7 +9,9 @@ use crate::auth::{verify_service_user, get_user_id};
 use crate::model::MediaSubscription;
 use crate::payment::PaymentService;
 
-use super::{paginate, parse_optional_uuid, parse_uuid};
+use super::{
+    get_limit_offset_from_pagination, parse_optional_uuid, parse_uuid,
+};
 
 pub struct MediaSubscriptionService {
     pool: Pool,
@@ -180,17 +182,22 @@ impl media_subscription_service_server::MediaSubscriptionService
 
         let shop_uuid = parse_optional_uuid(shop_id, "shop_id")?;
 
-        let (limit, offset, pagination) = paginate(pagination)?;
+        let (limit, offset, mut pagination) =
+            get_limit_offset_from_pagination(pagination)?;
 
-        let found_media_subscriptions = MediaSubscription::list(
+        let (found_media_subscriptions, count) = MediaSubscription::list(
             &self.pool,
             &user_id,
             shop_uuid,
             is_accessible,
-            limit,
-            offset,
+            limit.into(),
+            offset.into(),
         )
         .await?;
+
+        pagination.total_elements = count.try_into().map_err(|_| {
+            Status::internal("Could not convert 'count' from i64 to u32")
+        })?;
 
         Ok(Response::new(ListMediaSubscriptionsResponse {
             media_subscriptions: found_media_subscriptions

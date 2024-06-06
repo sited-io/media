@@ -9,7 +9,7 @@ use sea_query::{
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
 
-use crate::db::DbError;
+use crate::db::{get_count_from_rows, DbError};
 
 #[derive(Debug, Clone, Iden)]
 #[iden(rename = "media_subscriptions")]
@@ -176,14 +176,14 @@ impl MediaSubscription {
         is_accessible: Option<bool>,
         limit: u64,
         offset: u64,
-    ) -> Result<Vec<Self>, DbError> {
-        let conn = pool.get().await?;
+    ) -> Result<(Vec<Self>, i64), DbError> {
+        let mut conn = pool.get().await?;
+        let transaction = conn.transaction().await?;
 
-        let (sql, values) = {
+        let ((sql, values), (count_sql, count_values)) = {
             let mut query = Query::select();
 
             query
-                .column(Asterisk)
                 .from(MediaSubscriptionIden::Table)
                 .cond_where(
                     Expr::col(MediaSubscriptionIden::BuyerUserId)
@@ -212,15 +212,31 @@ impl MediaSubscription {
                 );
             }
 
-            query
-                .limit(limit)
-                .offset(offset)
-                .build_postgres(PostgresQueryBuilder)
+            (
+                query
+                    .clone()
+                    .column(Asterisk)
+                    .limit(limit)
+                    .offset(offset)
+                    .build_postgres(PostgresQueryBuilder),
+                query
+                    .expr(
+                        Expr::col((MediaSubscriptionIden::Table, Asterisk))
+                            .count(),
+                    )
+                    .build_postgres(PostgresQueryBuilder),
+            )
         };
 
-        let rows = conn.query(sql.as_str(), &values.as_params()).await?;
+        let rows = transaction.query(sql.as_str(), &values.as_params()).await?;
+        let count_rows = transaction
+            .query(count_sql.as_str(), &count_values.as_params())
+            .await?;
+        transaction.commit().await?;
 
-        Ok(rows.iter().map(Self::from).collect())
+        let count = get_count_from_rows(&count_rows);
+
+        Ok((rows.iter().map(Self::from).collect(), count))
     }
 }
 

@@ -2,11 +2,14 @@ use std::ops::DerefMut;
 
 use deadpool_postgres::tokio_postgres::error::SqlState;
 use deadpool_postgres::tokio_postgres::types::{FromSql, Type, WrongType};
+use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::{
     tokio_postgres::NoTls, Config, CreatePoolError, Pool, PoolError, Runtime,
     SslMode,
 };
 
+use openssl::ssl::{SslConnector, SslMethod};
+use postgres_openssl::MakeTlsConnector;
 use refinery::Target;
 use sea_query::Iden;
 use tonic::Status;
@@ -22,6 +25,7 @@ pub enum DbError {
     Pool(PoolError),
     CreatePool(CreatePoolError),
     SeaQuery(sea_query::error::Error),
+    Other(Option<String>),
 }
 
 impl DbError {
@@ -103,6 +107,10 @@ impl From<DbError> for Status {
                 tracing::log::error!("{sea_query_err:?}");
                 Status::internal("")
             }
+            DbError::Other(other_err) => {
+                tracing::log::error!("{other_err:?}");
+                Status::internal("")
+            }
         }
     }
 }
@@ -113,6 +121,7 @@ pub fn init_db_pool(
     user: String,
     password: String,
     dbname: String,
+    root_cert: Option<String>,
 ) -> Result<Pool, CreatePoolError> {
     let mut config = Config::new();
     config.host = Some(host);
@@ -121,9 +130,17 @@ pub fn init_db_pool(
     config.password = Some(password);
     config.dbname = Some(dbname);
 
-    config.ssl_mode = Some(SslMode::Prefer);
-
-    config.create_pool(Some(Runtime::Tokio1), NoTls)
+    if let Some(root_cert) = root_cert {
+        println!("Using root cert {}", root_cert);
+        config.ssl_mode = Some(SslMode::Require);
+        let mut builder = SslConnector::builder(SslMethod::tls()).unwrap();
+        builder.set_ca_file(root_cert).unwrap();
+        let connector = MakeTlsConnector::new(builder.build());
+        config.create_pool(Some(Runtime::Tokio1), connector)
+    } else {
+        config.ssl_mode = Some(SslMode::Prefer);
+        config.create_pool(Some(Runtime::Tokio1), NoTls)
+    }
 }
 
 pub async fn migrate(pool: &Pool) -> Result<(), Box<dyn std::error::Error>> {
@@ -163,4 +180,10 @@ where
         }
         Some(ty) => Ok(ty),
     }
+}
+
+pub fn get_count_from_rows(rows: &Vec<Row>) -> i64 {
+    rows.first()
+        .map(|row| row.get::<&str, i64>("count"))
+        .unwrap_or(0)
 }

@@ -7,7 +7,9 @@ pub use media_subscription::MediaSubscriptionService;
 use tonic::Status;
 use uuid::Uuid;
 
-use crate::api::peoplesmarkets::pagination::v1::Pagination;
+use crate::api::peoplesmarkets::pagination::v1::{
+    Pagination, PaginationRequest, PaginationResponse,
+};
 
 fn uuid_err_to_grpc_status(field: &str) -> Status {
     Status::invalid_argument(format!("field {field} is not a valid UUID v4"))
@@ -51,6 +53,33 @@ fn paginate(
         limit = request.size;
         offset = (request.page - 1) * request.size;
         pagination = request;
+    }
+
+    Ok((limit, offset, pagination))
+}
+
+/// Returns limit and offset from PaginationRequest
+fn get_limit_offset_from_pagination(
+    request: Option<PaginationRequest>,
+) -> Result<(u32, u32, PaginationResponse), Status> {
+    let mut limit = 10;
+    let mut offset = 0;
+    let mut pagination = PaginationResponse {
+        page: 1,
+        size: limit,
+        total_elements: 0,
+    };
+
+    if let Some(request) = request {
+        if request.page < 1 {
+            return Err(Status::invalid_argument(
+                "pagination.page less than 1",
+            ));
+        }
+        limit = request.size;
+        offset = (request.page - 1) * request.size;
+        pagination.page = request.page;
+        pagination.size = request.size;
     }
 
     Ok((limit, offset, pagination))
