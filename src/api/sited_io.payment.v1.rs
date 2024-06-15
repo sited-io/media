@@ -211,15 +211,12 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/CreateAccount",
+                "/sited_io.payment.v1.StripeService/CreateAccount",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
-                        "CreateAccount",
-                    ),
+                    GrpcMethod::new("sited_io.payment.v1.StripeService", "CreateAccount"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -241,13 +238,13 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/CreateAccountLink",
+                "/sited_io.payment.v1.StripeService/CreateAccountLink",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
+                        "sited_io.payment.v1.StripeService",
                         "CreateAccountLink",
                     ),
                 );
@@ -271,15 +268,12 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/GetAccount",
+                "/sited_io.payment.v1.StripeService/GetAccount",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
-                        "GetAccount",
-                    ),
+                    GrpcMethod::new("sited_io.payment.v1.StripeService", "GetAccount"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -301,13 +295,13 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/GetAccountDetails",
+                "/sited_io.payment.v1.StripeService/GetAccountDetails",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
+                        "sited_io.payment.v1.StripeService",
                         "GetAccountDetails",
                     ),
                 );
@@ -331,13 +325,13 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/CreateCheckoutSession",
+                "/sited_io.payment.v1.StripeService/CreateCheckoutSession",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
+                        "sited_io.payment.v1.StripeService",
                         "CreateCheckoutSession",
                     ),
                 );
@@ -361,13 +355,13 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/CancelSubscription",
+                "/sited_io.payment.v1.StripeService/CancelSubscription",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
+                        "sited_io.payment.v1.StripeService",
                         "CancelSubscription",
                     ),
                 );
@@ -391,13 +385,13 @@ pub mod stripe_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.payment.v1.StripeService/ResumeSubscription",
+                "/sited_io.payment.v1.StripeService/ResumeSubscription",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.payment.v1.StripeService",
+                        "sited_io.payment.v1.StripeService",
                         "ResumeSubscription",
                     ),
                 );

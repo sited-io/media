@@ -2,14 +2,14 @@ use std::io::Result;
 
 fn main() -> Result<()> {
     const MEDIA_PROTOS: &[&str] = &[
-        "service-apis/proto/peoplesmarkets/media/v1/media.proto",
-        "service-apis/proto/peoplesmarkets/media/v1/media_subscription.proto",
+        "service-apis/proto/sited_io/media/v1/media.proto",
+        "service-apis/proto/sited_io/media/v1/media_subscription.proto",
     ];
 
     const CLIENT_PROTOS: &[&str] = &[
-        "service-apis/proto/peoplesmarkets/commerce/v1/shop.proto",
-        "service-apis/proto/peoplesmarkets/commerce/v1/offer.proto",
-        "service-apis/proto/peoplesmarkets/payment/v1/stripe.proto",
+        "service-apis/proto/sited_io/commerce/v1/shop.proto",
+        "service-apis/proto/sited_io/commerce/v1/offer.proto",
+        "service-apis/proto/sited_io/payment/v1/stripe.proto",
     ];
 
     const INCLUDES: &[&str] = &["service-apis/proto"];

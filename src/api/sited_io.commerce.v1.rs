@@ -237,13 +237,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/PutShopCustomization",
+                "/sited_io.commerce.v1.ShopCustomizationService/PutShopCustomization",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "PutShopCustomization",
                     ),
                 );
@@ -267,13 +267,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/GetShopCustomization",
+                "/sited_io.commerce.v1.ShopCustomizationService/GetShopCustomization",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "GetShopCustomization",
                     ),
                 );
@@ -297,13 +297,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/DeleteShopCustomization",
+                "/sited_io.commerce.v1.ShopCustomizationService/DeleteShopCustomization",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "DeleteShopCustomization",
                     ),
                 );
@@ -327,13 +327,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/PutBannerImageToShop",
+                "/sited_io.commerce.v1.ShopCustomizationService/PutBannerImageToShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "PutBannerImageToShop",
                     ),
                 );
@@ -357,13 +357,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/RemoveBannerImageFromShop",
+                "/sited_io.commerce.v1.ShopCustomizationService/RemoveBannerImageFromShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "RemoveBannerImageFromShop",
                     ),
                 );
@@ -387,13 +387,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/PutLogoImageToShop",
+                "/sited_io.commerce.v1.ShopCustomizationService/PutLogoImageToShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "PutLogoImageToShop",
                     ),
                 );
@@ -417,13 +417,13 @@ pub mod shop_customization_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopCustomizationService/RemoveLogoImageFromShop",
+                "/sited_io.commerce.v1.ShopCustomizationService/RemoveLogoImageFromShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopCustomizationService",
+                        "sited_io.commerce.v1.ShopCustomizationService",
                         "RemoveLogoImageFromShop",
                     ),
                 );
@@ -748,15 +748,12 @@ pub mod shop_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopService/CreateShop",
+                "/sited_io.commerce.v1.ShopService/CreateShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopService",
-                        "CreateShop",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.ShopService", "CreateShop"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -778,13 +775,11 @@ pub mod shop_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopService/GetShop",
+                "/sited_io.commerce.v1.ShopService/GetShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(
-                    GrpcMethod::new("peoplesmarkets.commerce.v1.ShopService", "GetShop"),
-                );
+                .insert(GrpcMethod::new("sited_io.commerce.v1.ShopService", "GetShop"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn list_shops(
@@ -805,15 +800,12 @@ pub mod shop_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopService/ListShops",
+                "/sited_io.commerce.v1.ShopService/ListShops",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopService",
-                        "ListShops",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.ShopService", "ListShops"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -835,15 +827,12 @@ pub mod shop_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopService/UpdateShop",
+                "/sited_io.commerce.v1.ShopService/UpdateShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopService",
-                        "UpdateShop",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.ShopService", "UpdateShop"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -865,15 +854,12 @@ pub mod shop_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.ShopService/DeleteShop",
+                "/sited_io.commerce.v1.ShopService/DeleteShop",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.ShopService",
-                        "DeleteShop",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.ShopService", "DeleteShop"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1432,15 +1418,12 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/CreateOffer",
+                "/sited_io.commerce.v1.OfferService/CreateOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
-                        "CreateOffer",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.OfferService", "CreateOffer"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1462,15 +1445,12 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/GetOffer",
+                "/sited_io.commerce.v1.OfferService/GetOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
-                        "GetOffer",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.OfferService", "GetOffer"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1492,15 +1472,12 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/GetMyOffer",
+                "/sited_io.commerce.v1.OfferService/GetMyOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
-                        "GetMyOffer",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.OfferService", "GetMyOffer"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1522,15 +1499,12 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/ListOffers",
+                "/sited_io.commerce.v1.OfferService/ListOffers",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
-                        "ListOffers",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.OfferService", "ListOffers"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1552,15 +1526,12 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/UpdateOffer",
+                "/sited_io.commerce.v1.OfferService/UpdateOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
-                        "UpdateOffer",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.OfferService", "UpdateOffer"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1582,15 +1553,12 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/DeleteOffer",
+                "/sited_io.commerce.v1.OfferService/DeleteOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
-                        "DeleteOffer",
-                    ),
+                    GrpcMethod::new("sited_io.commerce.v1.OfferService", "DeleteOffer"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -1612,13 +1580,13 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/AddImageToOffer",
+                "/sited_io.commerce.v1.OfferService/AddImageToOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
+                        "sited_io.commerce.v1.OfferService",
                         "AddImageToOffer",
                     ),
                 );
@@ -1642,13 +1610,13 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/RemoveImageFromOffer",
+                "/sited_io.commerce.v1.OfferService/RemoveImageFromOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
+                        "sited_io.commerce.v1.OfferService",
                         "RemoveImageFromOffer",
                     ),
                 );
@@ -1672,13 +1640,13 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/PutPriceToOffer",
+                "/sited_io.commerce.v1.OfferService/PutPriceToOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
+                        "sited_io.commerce.v1.OfferService",
                         "PutPriceToOffer",
                     ),
                 );
@@ -1702,13 +1670,13 @@ pub mod offer_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/peoplesmarkets.commerce.v1.OfferService/RemovePriceFromOffer",
+                "/sited_io.commerce.v1.OfferService/RemovePriceFromOffer",
             );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new(
-                        "peoplesmarkets.commerce.v1.OfferService",
+                        "sited_io.commerce.v1.OfferService",
                         "RemovePriceFromOffer",
                     ),
                 );

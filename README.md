@@ -1,4 +1,4 @@
-# Media service for peoplesmarkets.com
+# Media service for sited.io
 
 ## Prerequesites
 
@@ -36,8 +36,8 @@ export DB_USER='media_user'
 export DB_PASSWORD=''
 export DB_DBNAME='media'
 
-export JWKS_URL='https://auth-dev.peoplesmarkets.com/oauth/v2/keys'
-export JWKS_HOST='auth-dev.peoplesmarkets.com'
+export JWKS_URL='https://auth-dev.sited.io/oauth/v2/keys'
+export JWKS_HOST='auth-dev.sited.io'
 ```
 
 ### local database

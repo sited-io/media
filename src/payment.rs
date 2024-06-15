@@ -2,8 +2,8 @@ use tonic::transport::Channel;
 use tonic::{Request, Status};
 use uuid::Uuid;
 
-use crate::api::peoplesmarkets::payment::v1::stripe_service_client::StripeServiceClient;
-use crate::api::peoplesmarkets::payment::v1::{
+use crate::api::sited_io::payment::v1::stripe_service_client::StripeServiceClient;
+use crate::api::sited_io::payment::v1::{
     CancelSubscriptionRequest, ResumeSubscriptionRequest,
 };
 use crate::CredentialsService;

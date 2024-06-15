@@ -3,8 +3,8 @@ use deadpool_postgres::Pool;
 use jwtk::jwk::RemoteJwksVerifier;
 use tonic::{async_trait, Request, Response, Status};
 
-use crate::api::peoplesmarkets::media::v1::{PutMediaSubscriptionRequest, PutMediaSubscriptionResponse, CancelMediaSubscriptionRequest, CancelMediaSubscriptionResponse, ResumeMediaSubscriptionRequest, ResumeMediaSubscriptionResponse, GetMediaSubscriptionRequest, GetMediaSubscriptionResponse, ListMediaSubscriptionsRequest, ListMediaSubscriptionsResponse, MediaSubscriptionResponse};
-use crate::api::peoplesmarkets::media::v1::media_subscription_service_server::{MediaSubscriptionServiceServer, self};
+use crate::api::sited_io::media::v1::{PutMediaSubscriptionRequest, PutMediaSubscriptionResponse, CancelMediaSubscriptionRequest, CancelMediaSubscriptionResponse, ResumeMediaSubscriptionRequest, ResumeMediaSubscriptionResponse, GetMediaSubscriptionRequest, GetMediaSubscriptionResponse, ListMediaSubscriptionsRequest, ListMediaSubscriptionsResponse, MediaSubscriptionResponse};
+use crate::api::sited_io::media::v1::media_subscription_service_server::{MediaSubscriptionServiceServer, self};
 use crate::auth::{verify_service_user, get_user_id};
 use crate::model::MediaSubscription;
 use crate::payment::PaymentService;

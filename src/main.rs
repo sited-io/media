@@ -4,7 +4,7 @@ use tonic::transport::Server;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tower_http::trace::TraceLayer;
 
-use media::api::peoplesmarkets::media::v1::media_service_server::MediaServiceServer;
+use media::api::sited_io::media::v1::media_service_server::MediaServiceServer;
 use media::db::{init_db_pool, migrate};
 use media::files::FileService;
 use media::logging::{LogOnFailure, LogOnRequest, LogOnResponse};
@@ -85,7 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             tonic_health::pb::FILE_DESCRIPTOR_SET,
         )
         .register_encoded_file_descriptor_set(
-            media::api::peoplesmarkets::FILE_DESCRIPTOR_SET,
+            media::api::sited_io::FILE_DESCRIPTOR_SET,
         )
         .build()
         .unwrap();

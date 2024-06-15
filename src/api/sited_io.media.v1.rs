@@ -486,7 +486,7 @@ pub mod media_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/peoplesmarkets.media.v1.MediaService/CreateMedia" => {
+                "/sited_io.media.v1.MediaService/CreateMedia" => {
                     #[allow(non_camel_case_types)]
                     struct CreateMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -532,7 +532,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/GetMedia" => {
+                "/sited_io.media.v1.MediaService/GetMedia" => {
                     #[allow(non_camel_case_types)]
                     struct GetMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -578,7 +578,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/DownloadMedia" => {
+                "/sited_io.media.v1.MediaService/DownloadMedia" => {
                     #[allow(non_camel_case_types)]
                     struct DownloadMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -624,7 +624,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/ListMedia" => {
+                "/sited_io.media.v1.MediaService/ListMedia" => {
                     #[allow(non_camel_case_types)]
                     struct ListMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -670,7 +670,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/ListAccessibleMedia" => {
+                "/sited_io.media.v1.MediaService/ListAccessibleMedia" => {
                     #[allow(non_camel_case_types)]
                     struct ListAccessibleMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -717,7 +717,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/UpdateMedia" => {
+                "/sited_io.media.v1.MediaService/UpdateMedia" => {
                     #[allow(non_camel_case_types)]
                     struct UpdateMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -763,7 +763,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/DeleteMedia" => {
+                "/sited_io.media.v1.MediaService/DeleteMedia" => {
                     #[allow(non_camel_case_types)]
                     struct DeleteMediaSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -809,7 +809,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/InitiateMultipartUpload" => {
+                "/sited_io.media.v1.MediaService/InitiateMultipartUpload" => {
                     #[allow(non_camel_case_types)]
                     struct InitiateMultipartUploadSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -861,7 +861,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/PutMultipartChunk" => {
+                "/sited_io.media.v1.MediaService/PutMultipartChunk" => {
                     #[allow(non_camel_case_types)]
                     struct PutMultipartChunkSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -908,7 +908,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/CompleteMultipartUpload" => {
+                "/sited_io.media.v1.MediaService/CompleteMultipartUpload" => {
                     #[allow(non_camel_case_types)]
                     struct CompleteMultipartUploadSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -960,7 +960,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/AddMediaToOffer" => {
+                "/sited_io.media.v1.MediaService/AddMediaToOffer" => {
                     #[allow(non_camel_case_types)]
                     struct AddMediaToOfferSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -1007,7 +1007,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/UpdateMediaOfferOrdering" => {
+                "/sited_io.media.v1.MediaService/UpdateMediaOfferOrdering" => {
                     #[allow(non_camel_case_types)]
                     struct UpdateMediaOfferOrderingSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -1059,7 +1059,7 @@ pub mod media_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaService/RemoveMediaFromOffer" => {
+                "/sited_io.media.v1.MediaService/RemoveMediaFromOffer" => {
                     #[allow(non_camel_case_types)]
                     struct RemoveMediaFromOfferSvc<T: MediaService>(pub Arc<T>);
                     impl<
@@ -1147,7 +1147,7 @@ pub mod media_service_server {
         }
     }
     impl<T: MediaService> tonic::server::NamedService for MediaServiceServer<T> {
-        const NAME: &'static str = "peoplesmarkets.media.v1.MediaService";
+        const NAME: &'static str = "sited_io.media.v1.MediaService";
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -1386,7 +1386,7 @@ pub mod media_subscription_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/peoplesmarkets.media.v1.MediaSubscriptionService/PutMediaSubscription" => {
+                "/sited_io.media.v1.MediaSubscriptionService/PutMediaSubscription" => {
                     #[allow(non_camel_case_types)]
                     struct PutMediaSubscriptionSvc<T: MediaSubscriptionService>(
                         pub Arc<T>,
@@ -1438,7 +1438,7 @@ pub mod media_subscription_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaSubscriptionService/GetMediaSubscription" => {
+                "/sited_io.media.v1.MediaSubscriptionService/GetMediaSubscription" => {
                     #[allow(non_camel_case_types)]
                     struct GetMediaSubscriptionSvc<T: MediaSubscriptionService>(
                         pub Arc<T>,
@@ -1490,7 +1490,7 @@ pub mod media_subscription_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaSubscriptionService/ListMediaSubscriptions" => {
+                "/sited_io.media.v1.MediaSubscriptionService/ListMediaSubscriptions" => {
                     #[allow(non_camel_case_types)]
                     struct ListMediaSubscriptionsSvc<T: MediaSubscriptionService>(
                         pub Arc<T>,
@@ -1542,7 +1542,7 @@ pub mod media_subscription_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaSubscriptionService/CancelMediaSubscription" => {
+                "/sited_io.media.v1.MediaSubscriptionService/CancelMediaSubscription" => {
                     #[allow(non_camel_case_types)]
                     struct CancelMediaSubscriptionSvc<T: MediaSubscriptionService>(
                         pub Arc<T>,
@@ -1596,7 +1596,7 @@ pub mod media_subscription_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/peoplesmarkets.media.v1.MediaSubscriptionService/ResumeMediaSubscription" => {
+                "/sited_io.media.v1.MediaSubscriptionService/ResumeMediaSubscription" => {
                     #[allow(non_camel_case_types)]
                     struct ResumeMediaSubscriptionSvc<T: MediaSubscriptionService>(
                         pub Arc<T>,
@@ -1689,6 +1689,6 @@ pub mod media_subscription_service_server {
     }
     impl<T: MediaSubscriptionService> tonic::server::NamedService
     for MediaSubscriptionServiceServer<T> {
-        const NAME: &'static str = "peoplesmarkets.media.v1.MediaSubscriptionService";
+        const NAME: &'static str = "sited_io.media.v1.MediaSubscriptionService";
     }
 }

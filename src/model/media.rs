@@ -8,10 +8,10 @@ use sea_query::{
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
 
-use crate::api::peoplesmarkets::media::v1::{
+use crate::api::sited_io::media::v1::{
     MediaFilterField, MediaOrderByField,
 };
-use crate::api::peoplesmarkets::ordering::v1::Direction;
+use crate::api::sited_io::ordering::v1::Direction;
 use crate::db::{get_count_from_rows, DbError};
 
 use super::media_offer::{MediaOfferIden, MediaOffersVec};

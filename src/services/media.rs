@@ -4,10 +4,10 @@ use jwtk::jwk::RemoteJwksVerifier;
 use tonic::{async_trait, Request, Response, Status};
 use uuid::Uuid;
 
-use crate::api::peoplesmarkets::media::v1::media_service_server::{
+use crate::api::sited_io::media::v1::media_service_server::{
     self, MediaServiceServer,
 };
-use crate::api::peoplesmarkets::media::v1::{
+use crate::api::sited_io::media::v1::{
     AddMediaToOfferRequest, AddMediaToOfferResponse,
     CompleteMultipartUploadRequest, CompleteMultipartUploadResponse,
     CreateMediaRequest, CreateMediaResponse, DeleteMediaRequest,
