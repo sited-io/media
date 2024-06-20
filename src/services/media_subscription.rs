@@ -3,9 +3,18 @@ use deadpool_postgres::Pool;
 use jwtk::jwk::RemoteJwksVerifier;
 use tonic::{async_trait, Request, Response, Status};
 
-use crate::api::sited_io::media::v1::{PutMediaSubscriptionRequest, PutMediaSubscriptionResponse, CancelMediaSubscriptionRequest, CancelMediaSubscriptionResponse, ResumeMediaSubscriptionRequest, ResumeMediaSubscriptionResponse, GetMediaSubscriptionRequest, GetMediaSubscriptionResponse, ListMediaSubscriptionsRequest, ListMediaSubscriptionsResponse, MediaSubscriptionResponse};
-use crate::api::sited_io::media::v1::media_subscription_service_server::{MediaSubscriptionServiceServer, self};
-use crate::auth::{verify_service_user, get_user_id};
+use crate::api::sited_io::media::v1::media_subscription_service_server::{
+    self, MediaSubscriptionServiceServer,
+};
+use crate::api::sited_io::media::v1::{
+    CancelMediaSubscriptionRequest, CancelMediaSubscriptionResponse,
+    GetMediaSubscriptionRequest, GetMediaSubscriptionResponse,
+    ListMediaSubscriptionsRequest, ListMediaSubscriptionsResponse,
+    MediaSubscriptionResponse, PutMediaSubscriptionRequest,
+    PutMediaSubscriptionResponse, ResumeMediaSubscriptionRequest,
+    ResumeMediaSubscriptionResponse,
+};
+use crate::auth::{get_user_id, verify_service_user};
 use crate::model::MediaSubscription;
 use crate::payment::PaymentService;
 
@@ -98,6 +107,10 @@ impl media_subscription_service_server::MediaSubscriptionService
         &self,
         request: Request<PutMediaSubscriptionRequest>,
     ) -> Result<Response<PutMediaSubscriptionResponse>, Status> {
+        tracing::log::debug!(
+            "[MediaSubscriptionService.put_media_subscription]: {:?}",
+            request.metadata()
+        );
         verify_service_user(request.metadata(), &self.verifier).await?;
 
         let PutMediaSubscriptionRequest {

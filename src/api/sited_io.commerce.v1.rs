@@ -462,6 +462,8 @@ pub struct ShopResponse {
     pub contact_email_address: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "14")]
     pub client_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "15")]
+    pub website_id: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -496,6 +498,8 @@ pub struct GetShopRequest {
     pub domain: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "5")]
     pub owner: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "6")]
+    pub website_id: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
