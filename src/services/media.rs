@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use aws_sdk_s3::types::CompletedPart;
 use deadpool_postgres::Pool;
 use jwtk::jwk::RemoteJwksVerifier;
@@ -26,7 +28,7 @@ use crate::files::FileService;
 use crate::model::{Media, MediaOffer};
 use crate::{CommerceService, QuotaService};
 
-use super::{get_limit_offset_from_pagination, paginate, parse_uuid};
+use super::{get_limit_offset_from_pagination, parse_uuid};
 
 pub struct MediaService {
     pool: Pool,
@@ -224,16 +226,27 @@ impl media_service_server::MediaService for MediaService {
 
         let shop_id = parse_uuid(&shop_id, "shop_id")?;
 
-        let (limit, offset, pagination) = paginate(pagination)?;
+        let (limit, offset, mut pagination) =
+            get_limit_offset_from_pagination(pagination)?;
 
         let filter = filter.map(|f| (f.field(), f.query));
 
         let order_by = order_by.map(|o| (o.field(), o.direction()));
 
-        let found_medias = Media::list(
-            &self.pool, &shop_id, &user_id, limit, offset, filter, order_by,
+        let (found_medias, count) = Media::list(
+            &self.pool,
+            &shop_id,
+            &user_id,
+            limit.into(),
+            offset.into(),
+            filter,
+            order_by,
         )
         .await?;
+
+        pagination.total_elements = count.try_into().map_err(|_| {
+            Status::internal("Could not convert 'count' from i64 to u32")
+        })?;
 
         Ok(Response::new(ListMediaResponse {
             medias: found_medias
@@ -536,10 +549,57 @@ impl media_service_server::MediaService for MediaService {
         let media_id = parse_uuid(&media_id, "media_id")?;
         let offer_id = parse_uuid(&offer_id, "offer_id")?;
 
+        let found_media_offer =
+            MediaOffer::get(&self.pool, &media_id, &offer_id)
+                .await?
+                .ok_or_else(|| Status::not_found(""))?;
+
+        let old_ordering = found_media_offer.ordering;
+
+        let mut found_media_offers =
+            MediaOffer::list(&self.pool, &user_id, &offer_id).await?;
+
+        // update media_offer with new_ordering
         MediaOffer::update_ordering(
             &self.pool, &media_id, &offer_id, &user_id, ordering,
         )
         .await?;
+
+        match old_ordering.cmp(&ordering) {
+            Ordering::Less => {
+                // decrement [old_ordering + 1, new_ordering] by 1
+                found_media_offers.retain(|m| {
+                    m.ordering >= (old_ordering + 1) && m.ordering <= ordering
+                });
+                for m in found_media_offers {
+                    MediaOffer::update_ordering(
+                        &self.pool,
+                        &m.media_id,
+                        &m.offer_id,
+                        &user_id,
+                        m.ordering - 1,
+                    )
+                    .await?;
+                }
+            }
+            Ordering::Greater => {
+                // increment [new_ordering, old_ordering -1] by 1
+                found_media_offers.retain(|m| {
+                    m.ordering >= ordering && m.ordering <= (old_ordering - 1)
+                });
+                for m in found_media_offers {
+                    MediaOffer::update_ordering(
+                        &self.pool,
+                        &m.media_id,
+                        &m.offer_id,
+                        &user_id,
+                        m.ordering + 1,
+                    )
+                    .await?;
+                }
+            }
+            Ordering::Equal => {}
+        }
 
         Ok(Response::new(UpdateMediaOfferOrderingResponse {}))
     }

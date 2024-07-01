@@ -8,9 +8,7 @@ use sea_query::{
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
 
-use crate::api::sited_io::media::v1::{
-    MediaFilterField, MediaOrderByField,
-};
+use crate::api::sited_io::media::v1::{MediaFilterField, MediaOrderByField};
 use crate::api::sited_io::ordering::v1::Direction;
 use crate::db::{get_count_from_rows, DbError};
 
@@ -57,7 +55,6 @@ impl Media {
 
     fn select_with_offer_ids() -> SelectStatement {
         Query::select()
-            .column((MediaIden::Table, Asterisk))
             .expr_as(MediaOffer::get_agg(), Self::get_media_offers_alias())
             .from(MediaIden::Table)
             .left_join(
@@ -70,6 +67,18 @@ impl Media {
                 (MediaOfferIden::Table, MediaOfferIden::Ordering)
                     .into_column_ref(),
             ])
+            .to_owned()
+    }
+
+    fn select_count() -> SelectStatement {
+        Query::select()
+            .expr(Expr::col((MediaIden::Table, Asterisk)).count())
+            .from(MediaIden::Table)
+            .left_join(
+                MediaOfferIden::Table,
+                Expr::col((MediaIden::Table, MediaIden::MediaId))
+                    .equals((MediaOfferIden::Table, MediaOfferIden::MediaId)),
+            )
             .to_owned()
     }
 
@@ -250,11 +259,12 @@ impl Media {
         offset: u64,
         filter: Option<(MediaFilterField, String)>,
         order_by: Option<(MediaOrderByField, Direction)>,
-    ) -> Result<Vec<Self>, DbError> {
-        let client = pool.get().await?;
+    ) -> Result<(Vec<Self>, i64), DbError> {
+        let conn = pool.get().await?;
 
-        let (sql, values) = {
+        let ((sql, values), (count_sql, count_values)) = {
             let mut query = Self::select_with_offer_ids();
+            let mut count_query = Self::select_count();
 
             query
                 .and_where(
@@ -266,8 +276,19 @@ impl Media {
                         .eq(user_id),
                 );
 
+            count_query
+                .and_where(
+                    Expr::col((MediaIden::Table, MediaIden::ShopId))
+                        .eq(*shop_id),
+                )
+                .and_where(
+                    Expr::col((MediaIden::Table, MediaIden::UserId))
+                        .eq(user_id),
+                );
+
             if let Some((filter_field, filter_query)) = filter {
-                Self::add_filter(&mut query, filter_field, filter_query)?;
+                Self::add_filter(&mut query, filter_field, filter_query.clone())?;
+                Self::add_filter(&mut count_query, filter_field, filter_query)?;
             }
 
             if let Some((order_by_field, order_by_direction)) = order_by {
@@ -278,15 +299,26 @@ impl Media {
                 );
             }
 
-            query
-                .limit(limit)
-                .offset(offset)
-                .build_postgres(PostgresQueryBuilder)
+            (
+                query
+                    .column((MediaIden::Table, Asterisk))
+                    .limit(limit)
+                    .offset(offset)
+                    .build_postgres(PostgresQueryBuilder),
+                count_query
+                    .expr(Expr::col((MediaIden::Table, Asterisk)).count())
+                    .build_postgres(PostgresQueryBuilder),
+            )
         };
 
-        let rows = client.query(sql.as_str(), &values.as_params()).await?;
+        let rows = conn.query(sql.as_str(), &values.as_params()).await?;
+        let count_rows = conn
+            .query(count_sql.as_str(), &count_values.as_params())
+            .await?;
 
-        Ok(rows.iter().map(Self::from).collect())
+        let count = get_count_from_rows(&count_rows);
+
+        Ok((rows.iter().map(Self::from).collect(), count))
     }
 
     pub async fn list_all_for_user(
@@ -336,7 +368,6 @@ impl Media {
 
             (
                 query
-                    .clone()
                     .column((MediaIden::Table, Asterisk))
                     .limit(limit)
                     .offset(offset)

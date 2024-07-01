@@ -1,9 +1,10 @@
 use deadpool_postgres::tokio_postgres::types::{private, FromSql, Type};
+use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::Pool;
 use fallible_iterator::FallibleIterator;
 use postgres_protocol::types;
 use sea_query::{
-    Asterisk, Expr, Func, Iden, PostgresQueryBuilder, Query, SimpleExpr,
+    all, Asterisk, Expr, Func, Iden, PostgresQueryBuilder, Query, SimpleExpr,
 };
 use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
@@ -22,9 +23,9 @@ pub enum MediaOfferIden {
 
 #[derive(Debug, Clone)]
 pub struct MediaOffer {
+    pub user_id: String,
     pub media_id: Uuid,
     pub offer_id: Uuid,
-    pub user_id: String,
     pub ordering: i64,
 }
 
@@ -76,6 +77,27 @@ impl MediaOffer {
         Ok(())
     }
 
+    pub async fn get(
+        pool: &Pool,
+        media_id: &Uuid,
+        offer_id: &Uuid,
+    ) -> Result<Option<Self>, DbError> {
+        let conn = pool.get().await?;
+
+        let (sql, values) = Query::select()
+            .column(Asterisk)
+            .from(MediaOfferIden::Table)
+            .cond_where(all![
+                Expr::col(MediaOfferIden::MediaId).eq(*media_id),
+                Expr::col(MediaOfferIden::OfferId).eq(*offer_id)
+            ])
+            .build_postgres(PostgresQueryBuilder);
+
+        let row = conn.query_opt(sql.as_str(), &values.as_params()).await?;
+
+        Ok(row.map(Self::from))
+    }
+
     pub async fn get_highest_ordering(
         pool: &Pool,
         offer_id: &Uuid,
@@ -101,6 +123,28 @@ impl MediaOffer {
         };
 
         Ok(ordering)
+    }
+
+    pub async fn list(
+        pool: &Pool,
+        user_id: &String,
+        offer_id: &Uuid,
+    ) -> Result<Vec<Self>, DbError> {
+        let conn = pool.get().await?;
+
+        let (sql, values) = Query::select()
+            .column(Asterisk)
+            .from(MediaOfferIden::Table)
+            .cond_where(all![
+                Expr::col(MediaOfferIden::UserId).eq(user_id),
+                Expr::col(MediaOfferIden::OfferId).eq(*offer_id),
+            ])
+            .order_by(MediaOfferIden::Ordering, sea_query::Order::Asc)
+            .build_postgres(PostgresQueryBuilder);
+
+        let rows = conn.query(sql.as_str(), &values.as_params()).await?;
+
+        Ok(rows.into_iter().map(Self::from).collect())
     }
 
     pub async fn update_ordering(
@@ -143,6 +187,17 @@ impl MediaOffer {
         client.execute(sql.as_str(), &values.as_params()).await?;
 
         Ok(())
+    }
+}
+
+impl From<Row> for MediaOffer {
+    fn from(row: Row) -> Self {
+        Self {
+            user_id: row.get(MediaOfferIden::UserId.to_string().as_str()),
+            media_id: row.get(MediaOfferIden::MediaId.to_string().as_str()),
+            offer_id: row.get(MediaOfferIden::OfferId.to_string().as_str()),
+            ordering: row.get(MediaOfferIden::Ordering.to_string().as_str()),
+        }
     }
 }
 
