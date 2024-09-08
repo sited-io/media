@@ -1,0 +1,4 @@
+CREATE TABLE sub_shops (
+  shop_id UUID NOT NULL PRIMARY KEY,
+  user_id VARCHAR NOT NULL
+);

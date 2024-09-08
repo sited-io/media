@@ -123,6 +123,52 @@ impl MediaSubscription {
         Ok(Self::from(row))
     }
 
+    pub async fn upsert(
+        pool: &Pool,
+        media_subscription: MediaSubscription,
+    ) -> Result<Self, DbError> {
+        let conn = pool.get().await?;
+
+        let (sql, values) = Query::insert()
+            .into_table(MediaSubscriptionIden::Table)
+            .columns(Self::PUT_COLUMNS)
+            .values([
+                media_subscription.media_subscription_id.into(),
+                media_subscription.buyer_user_id.into(),
+                media_subscription.offer_id.into(),
+                media_subscription.shop_id.into(),
+                media_subscription.current_period_start.into(),
+                media_subscription.current_period_end.into(),
+                media_subscription.subscription_status.into(),
+                media_subscription.payed_at.into(),
+                media_subscription.payed_until.into(),
+                media_subscription.stripe_subscription_id.into(),
+                media_subscription.canceled_at.into(),
+                media_subscription.cancel_at.into(),
+            ])?
+            .on_conflict(
+                OnConflict::column(MediaSubscriptionIden::MediaSubscriptionId)
+                    .update_columns(Self::PUT_COLUMNS)
+                    .to_owned(),
+            )
+            .on_conflict(
+                OnConflict::columns([
+                    MediaSubscriptionIden::BuyerUserId,
+                    MediaSubscriptionIden::OfferId,
+                ])
+                .update_columns(Self::PUT_COLUMNS)
+                .to_owned(),
+            )
+            .returning_all()
+            .build_postgres(PostgresQueryBuilder);
+
+        let row = conn
+            .query_one(sql.as_str(), values.as_params().as_ref())
+            .await?;
+
+        Ok(Self::from(row))
+    }
+
     pub async fn get(
         pool: &Pool,
         buyer_user_id: &String,
@@ -237,6 +283,27 @@ impl MediaSubscription {
         let count = get_count_from_rows(&count_rows);
 
         Ok((rows.iter().map(Self::from).collect(), count))
+    }
+
+    pub async fn delete(
+        pool: &Pool,
+        media_subscription_id: &Uuid,
+    ) -> Result<Self, DbError> {
+        let conn = pool.get().await?;
+
+        let (sql, values) = Query::delete()
+            .from_table(MediaSubscriptionIden::Table)
+            .and_where(
+                Expr::col(MediaSubscriptionIden::MediaSubscriptionId)
+                    .eq(*media_subscription_id),
+            )
+            .returning_all()
+            .build_postgres(PostgresQueryBuilder);
+
+        Ok(conn
+            .query_one(sql.as_str(), &values.as_params())
+            .await?
+            .into())
     }
 }
 

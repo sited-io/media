@@ -25,8 +25,8 @@ use crate::api::sited_io::media::v1::{
 use crate::auth::get_user_id;
 use crate::db::DbError;
 use crate::files::FileService;
-use crate::model::{Media, MediaOffer};
-use crate::{CommerceService, QuotaService};
+use crate::model::{Media, MediaOffer, SubOffer, SubShop};
+use crate::QuotaService;
 
 use super::{get_limit_offset_from_pagination, parse_uuid};
 
@@ -34,42 +34,23 @@ pub struct MediaService {
     pool: Pool,
     verifier: RemoteJwksVerifier,
     file_service: FileService,
-    commerce_service: CommerceService,
     quota_service: QuotaService,
 }
 
 impl MediaService {
-    fn new(
-        pool: Pool,
-        verifier: RemoteJwksVerifier,
-        file_service: FileService,
-        commerce_service: CommerceService,
-        quota_service: QuotaService,
-    ) -> Self {
-        Self {
-            pool,
-            verifier,
-            file_service,
-            commerce_service,
-            quota_service,
-        }
-    }
-
     pub fn build(
         pool: Pool,
         verifier: RemoteJwksVerifier,
         file_service: FileService,
-        commerce_service: CommerceService,
         quota_service: QuotaService,
         max_message_size_bytes: usize,
     ) -> MediaServiceServer<Self> {
-        MediaServiceServer::new(Self::new(
+        MediaServiceServer::new(Self {
             pool,
             verifier,
             file_service,
-            commerce_service,
             quota_service,
-        ))
+        })
         .max_decoding_message_size(max_message_size_bytes)
         .max_encoding_message_size(max_message_size_bytes)
     }
@@ -98,6 +79,28 @@ impl MediaService {
     ) -> String {
         format!("{user_id}/{shop_id}/{media_id}")
     }
+
+    async fn check_shop_and_owner(
+        &self,
+        shop_id: &Uuid,
+        user_id: &String,
+    ) -> Result<SubShop, Status> {
+        SubShop::get_for_user(&self.pool, shop_id, user_id)
+            .await
+            .map_err(|_| Status::internal(""))?
+            .ok_or(Status::not_found("user is not owner of this shop"))
+    }
+
+    async fn check_offer_and_owner(
+        &self,
+        offer_id: &Uuid,
+        user_id: &String,
+    ) -> Result<SubOffer, Status> {
+        SubOffer::get_for_owner(&self.pool, offer_id, user_id)
+            .await
+            .map_err(|_| Status::internal(""))?
+            .ok_or(Status::not_found("user is not owner of this offer"))
+    }
 }
 
 #[async_trait]
@@ -117,17 +120,15 @@ impl media_service_server::MediaService for MediaService {
             file_name,
         } = request.into_inner();
 
-        let shop_uuid = parse_uuid(&shop_id, "shop_id")?;
+        let shop_id = parse_uuid(&shop_id, "shop_id")?;
 
         self.quota_service.check_quota(&user_id).await?;
 
-        self.commerce_service
-            .check_shop_and_owner(&shop_id, &user_id, &metadata)
-            .await?;
+        self.check_shop_and_owner(&shop_id, &user_id).await?;
 
         let media_id = Uuid::new_v4();
 
-        let file_path = Self::build_file_path(&user_id, &shop_uuid, &media_id);
+        let file_path = Self::build_file_path(&user_id, &shop_id, &media_id);
 
         let mut conn = self.pool.get().await.map_err(DbError::from)?;
         let transaction = conn.transaction().await.map_err(DbError::from)?;
@@ -142,7 +143,7 @@ impl media_service_server::MediaService for MediaService {
         let created_media = Media::create(
             &transaction,
             &media_id,
-            &shop_uuid,
+            &shop_id,
             &user_id,
             &name,
             &file_path,
@@ -501,16 +502,14 @@ impl media_service_server::MediaService for MediaService {
             ordering,
         } = request.into_inner();
 
-        let media_uuid = parse_uuid(&media_id, "media_id")?;
-        let offer_uuid = parse_uuid(&offer_id, "media_id")?;
+        let media_id = parse_uuid(&media_id, "media_id")?;
+        let offer_id = parse_uuid(&offer_id, "media_id")?;
 
         // Check if user is owner of the offer
-        self.commerce_service
-            .check_offer_and_owner(&offer_id, &user_id, &metadata)
-            .await?;
+        self.check_offer_and_owner(&offer_id, &user_id).await?;
 
         // Check if user is owner of media
-        Media::get_for_owner(&self.pool, &media_uuid, &user_id)
+        Media::get_for_owner(&self.pool, &media_id, &user_id)
             .await?
             .ok_or(Status::not_found(media_id))?;
 
@@ -518,9 +517,7 @@ impl media_service_server::MediaService for MediaService {
             Some(o) => o,
             None => {
                 let highest = MediaOffer::get_highest_ordering(
-                    &self.pool,
-                    &offer_uuid,
-                    &user_id,
+                    &self.pool, &offer_id, &user_id,
                 )
                 .await?;
 
@@ -528,7 +525,7 @@ impl media_service_server::MediaService for MediaService {
             }
         };
 
-        MediaOffer::create(&self.pool, &media_uuid, &offer_uuid, &user_id, ord)
+        MediaOffer::create(&self.pool, &media_id, &offer_id, &user_id, ord)
             .await?;
 
         Ok(Response::new(AddMediaToOfferResponse {}))

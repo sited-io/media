@@ -1,6 +1,5 @@
 pub mod api;
 mod auth;
-mod commerce;
 mod credentials;
 pub mod db;
 pub mod files;
@@ -9,9 +8,9 @@ mod model;
 mod payment;
 mod quota;
 mod services;
+pub mod subscribers;
 
 pub use auth::init_jwks_verifier;
-pub use commerce::CommerceService;
 pub use credentials::CredentialsService;
 pub use payment::PaymentService;
 pub use quota::QuotaService;
