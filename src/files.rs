@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use aws_config::BehaviorVersion;
 use aws_credential_types::Credentials;
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::presigning::PresigningConfig;
@@ -24,7 +25,7 @@ impl FileService {
         let credentials =
             Credentials::from_keys(access_key_id, secret_access_key, None);
 
-        let config = aws_config::from_env()
+        let config = aws_config::defaults(BehaviorVersion::v2024_03_28())
             .credentials_provider(credentials)
             .region(Region::new("auto"))
             .endpoint_url(bucket_endpoint)
@@ -199,9 +200,9 @@ impl FileService {
                 Status::internal("")
             })?
             .uri()
-            .clone();
+            .to_owned();
 
-        Ok(uri.to_string())
+        Ok(uri)
     }
 
     pub async fn remove_file(&self, file_path: &String) -> Result<(), Status> {

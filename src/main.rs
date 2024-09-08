@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .register_encoded_file_descriptor_set(
             media::api::sited_io::FILE_DESCRIPTOR_SET,
         )
-        .build()
+        .build_v1()
         .unwrap();
 
     let media_service = MediaService::build(

@@ -7,9 +7,7 @@ pub use media_subscription::MediaSubscriptionService;
 use tonic::Status;
 use uuid::Uuid;
 
-use crate::api::sited_io::pagination::v1::{
-    PaginationRequest, PaginationResponse,
-};
+use crate::api::sited_io::types::v1::{PaginationRequest, PaginationResponse};
 
 fn uuid_err_to_grpc_status(field: &str) -> Status {
     Status::invalid_argument(format!("field {field} is not a valid UUID v4"))

@@ -9,7 +9,7 @@ use sea_query_postgres::PostgresBinder;
 use uuid::Uuid;
 
 use crate::api::sited_io::media::v1::{MediaFilterField, MediaOrderByField};
-use crate::api::sited_io::ordering::v1::Direction;
+use crate::api::sited_io::types::v1::Direction;
 use crate::db::{get_count_from_rows, DbError};
 
 use super::media_offer::{MediaOfferIden, MediaOffersVec};
@@ -287,7 +287,11 @@ impl Media {
                 );
 
             if let Some((filter_field, filter_query)) = filter {
-                Self::add_filter(&mut query, filter_field, filter_query.clone())?;
+                Self::add_filter(
+                    &mut query,
+                    filter_field,
+                    filter_query.clone(),
+                )?;
                 Self::add_filter(&mut count_query, filter_field, filter_query)?;
             }
 
