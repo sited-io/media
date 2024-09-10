@@ -151,14 +151,6 @@ impl MediaSubscription {
                     .update_columns(Self::PUT_COLUMNS)
                     .to_owned(),
             )
-            .on_conflict(
-                OnConflict::columns([
-                    MediaSubscriptionIden::BuyerUserId,
-                    MediaSubscriptionIden::OfferId,
-                ])
-                .update_columns(Self::PUT_COLUMNS)
-                .to_owned(),
-            )
             .returning_all()
             .build_postgres(PostgresQueryBuilder);
 
