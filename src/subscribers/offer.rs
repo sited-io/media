@@ -18,7 +18,7 @@ impl OfferSubscriber {
     pub async fn subscribe(&self) {
         let mut subscriber = self
             .client
-            .queue_subscribe("commerce.offer.>", "commerce.offer".to_string())
+            .queue_subscribe("commerce.offer.>", "media.offer".to_string())
             .await
             .unwrap();
 
@@ -29,17 +29,17 @@ impl OfferSubscriber {
             let Ok(offer_response) = OfferResponse::decode(message.payload)
             else {
                 tracing::error!("[OfferSubscriber.subscribe]: could not decode offer response");
-                return;
+                continue;
             };
 
             let Ok(offer_id) = offer_response.offer_id.parse() else {
                 tracing::error!("[OfferSubscriber.subscribe]: could not parse offer_id as UUID");
-                return;
+                continue;
             };
 
             let Ok(shop_id) = offer_response.shop_id.parse() else {
                 tracing::error!("[OfferSubscriber.subscribe]: could not parse shop_id as UUID");
-                return;
+                continue;
             };
 
             if let Err(err) = match action {
@@ -55,7 +55,7 @@ impl OfferSubscriber {
                 "delete" => SubOffer::delete(&self.pool, &offer_id).await,
                 unexpected => {
                     tracing::error!("[OfferSubscriber.subscribe]: Unexpected action: '{unexpected}'");
-                    return;
+                    continue;
                 }
             } {
                 tracing::error!("[OfferSubscriber.subscribe]: {:?}", err);

@@ -18,7 +18,7 @@ impl ShopSubscriber {
     pub async fn subscribe(&self) {
         let mut subscriber = self
             .client
-            .queue_subscribe("commerce.shop.>", "commerce.shop".to_string())
+            .queue_subscribe("commerce.shop.>", "media.shop".to_string())
             .await
             .unwrap();
 
@@ -29,12 +29,12 @@ impl ShopSubscriber {
             let Ok(shop_response) = ShopResponse::decode(message.payload)
             else {
                 tracing::error!("[ShopSubscriber.subscribe]: could not decode message for subject {}", message.subject);
-                return;
+                continue;
             };
 
             let Ok(shop_id) = shop_response.shop_id.parse() else {
                 tracing::error!("[ShopSubscriber.subscribe]: could not parse shop_id as UUID");
-                return;
+                continue;
             };
 
             if let Err(err) = match action {
@@ -49,7 +49,7 @@ impl ShopSubscriber {
                 "delete" => SubShop::delete(&self.pool, &shop_id).await,
                 unexpected => {
                     tracing::error!("[ShopSubscriber.subscribe]: Unexpected action: '{unexpected}'");
-                    return;
+                    continue;
                 }
             } {
                 tracing::error!("[ShopSubscriber.subscribe]: {:?}", err);

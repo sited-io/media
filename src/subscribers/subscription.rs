@@ -46,7 +46,7 @@ impl SubscriptionSubscriber {
             .client
             .queue_subscribe(
                 "stripe-webhooks.subscription.>",
-                "stripe-webhooks.subscription".to_string(),
+                "media.subscription".to_string(),
             )
             .await
             .unwrap();
@@ -58,18 +58,20 @@ impl SubscriptionSubscriber {
             let Ok(media_subscription_response) =
                 MediaSubscriptionResponse::decode(message.payload)
             else {
-                return tracing::error!(
+                tracing::error!(
                     "[SubscriptionSubscriber.subscribe]: could not decode message for subject {}",
                     message.subject,
                 );
+                continue;
             };
 
             let Some(media_subscription) =
                 from_response(&media_subscription_response)
             else {
-                return tracing::error!(
+                tracing::error!(
                     "[SubscriptionSubscriber.subscribe]: could not convert message to MediaSubscription",
                 );
+                continue;
             };
 
             if let Err(err) = match action {
@@ -85,16 +87,18 @@ impl SubscriptionSubscriber {
                     .await
                 }
                 unexpected => {
-                    return tracing::error!(
+                    tracing::error!(
                         "[SubscriptionSubscriber.subscribe]: Unexpected action: '{}'",
                         unexpected,
                     );
+                    continue;
                 }
             } {
-                return tracing::error!(
+                tracing::error!(
                     "[SubscriptionSubscriber.subscribe]: {:?}",
                     err
                 );
+                continue;
             }
 
             tracing::info!(
