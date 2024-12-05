@@ -19,14 +19,6 @@ job "media" {
         sidecar_service {
           proxy {
             upstreams {
-              destination_name = "zitadel"
-              local_bind_port  = 8080
-            }
-            upstreams {
-              destination_name = "cockroach-sql"
-              local_bind_port  = 5432
-            }
-            upstreams {
               destination_name = "commerce-api"
               local_bind_port  = 10000
             }
@@ -59,27 +51,41 @@ job "media" {
       }
 
       template {
+        destination = "${NOMAD_SECRETS_DIR}/database_root_cert.crt"
+        env         = false 
+        change_mode = "restart"
+        data        = <<EOF
+{{- with secret "kv2/data/services" -}}
+{{ .Data.data.DATABASE_ROOT_CERT }}
+{{- end -}}
+EOF
+      }
+
+      template {
         destination = "${NOMAD_SECRETS_DIR}/.env"
         env         = true
         change_mode = "restart"
         data        = <<EOF
 {{ with nomadVar "nomad/jobs/media" }}
-RUST_LOG='{{ .LOG_LEVEL }}'
+RUST_LOG='{{ .RUST_LOG }}'
 {{ end }}
 
 HOST='0.0.0.0:{{ env "NOMAD_PORT_grpc" }}'
 
-DB_HOST='{{ env "NOMAD_UPSTREAM_IP_cockroach-sql" }}'
-DB_PORT='{{ env "NOMAD_UPSTREAM_PORT_cockroach-sql" }}'
-DB_DBNAME='media'
-DB_USER='media_user'
-{{ with secret "database/static-creds/media_user" }}
-DB_PASSWORD='{{ .Data.password }}'
+{{ with nomadVar "nomad/jobs/media"}}
+DB_HOST='{{ .DB_HOST }}'
+DB_PORT='{{ .DB_PORT }}'
+DB_DBNAME='{{ .DB_DBNAME }}'
+DB_USER='{{ .DB_USER }}'
+{{ end }}
+DB_ROOT_CERT='{{ env "NOMAD_SECRETS_DIR" }}/database_root_cert.crt'
+{{ with secret "kv2/data/services/media" }}
+DB_PASSWORD='{{ .Data.data.DB_PASSWORD }}'
 {{ end }}
 
-JWKS_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_zitadel" }}/oauth/v2/keys'
-OAUTH_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_zitadel" }}/oauth'
 {{ with nomadVar "nomad/jobs/" }}
+JWKS_URL='http://{{ .JWKS_HOST }}/oauth/v2/keys'
+OAUTH_URL='http://{{ .JWKS_HOST }}/oauth'
 JWKS_HOST='{{ .JWKS_HOST }}'
 OAUTH_HOST='{{ .JWKS_HOST }}'
 {{ end }}
@@ -100,6 +106,14 @@ SERVICE_USER_CLIENT_SECRET='{{ .Data.data.SERVICE_USER_CLIENT_SECRET }}'
 
 COMMERCE_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_commerce-api" }}'
 PAYMENT_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_payment-api" }}'
+
+{{ with nomadVar "nomad/jobs" }}
+NATS_HOST='{{ .NATS_HOST }}'
+NATS_USER='{{ .NATS_USER }}'
+{{ end }}
+{{ with secret "kv2/data/services" }}
+NATS_PASSWORD='{{ .Data.data.NATS_PASSWORD }}'
+{{ end }}
 EOF
       }
 
