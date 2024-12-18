@@ -148,7 +148,17 @@ impl MediaSubscription {
             ])?
             .on_conflict(
                 OnConflict::column(MediaSubscriptionIden::MediaSubscriptionId)
-                    .update_columns(Self::PUT_COLUMNS)
+                    .update_columns([
+                        MediaSubscriptionIden::ShopId,
+                        MediaSubscriptionIden::CurrentPeriodStart,
+                        MediaSubscriptionIden::CurrentPeriodEnd,
+                        MediaSubscriptionIden::SubscriptionStatus,
+                        MediaSubscriptionIden::PayedAt,
+                        MediaSubscriptionIden::PayedUntil,
+                        MediaSubscriptionIden::StripeSubscriptionId,
+                        MediaSubscriptionIden::CanceledAt,
+                        MediaSubscriptionIden::CancelAt,
+                    ])
                     .to_owned(),
             )
             .returning_all()
