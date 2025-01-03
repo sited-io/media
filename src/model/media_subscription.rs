@@ -42,7 +42,9 @@ pub struct MediaSubscription {
     pub subscription_status: String,
     pub payed_at: DateTime<Utc>,
     pub payed_until: DateTime<Utc>,
+    #[allow(unused)]
     pub created_at: DateTime<Utc>,
+    #[allow(unused)]
     pub updated_at: DateTime<Utc>,
     pub stripe_subscription_id: Option<String>,
     pub canceled_at: Option<DateTime<Utc>>,
@@ -160,6 +162,14 @@ impl MediaSubscription {
                         MediaSubscriptionIden::CancelAt,
                     ])
                     .to_owned(),
+            )
+            .on_conflict(
+                OnConflict::columns([
+                    MediaSubscriptionIden::BuyerUserId,
+                    MediaSubscriptionIden::OfferId,
+                ])
+                .update_columns(Self::PUT_COLUMNS)
+                .to_owned(),
             )
             .returning_all()
             .build_postgres(PostgresQueryBuilder);
