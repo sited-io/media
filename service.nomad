@@ -19,6 +19,10 @@ job "media" {
         sidecar_service {
           proxy {
             upstreams {
+              destination_name = "nats"
+              local_bind_port = 4222
+            }
+            upstreams {
               destination_name = "commerce-api"
               local_bind_port  = 10000
             }
@@ -72,6 +76,10 @@ RUST_LOG='{{ .RUST_LOG }}'
 
 HOST='0.0.0.0:{{ env "NOMAD_PORT_grpc" }}'
 
+NATS_HOST='{{ env "NOMAD_UPSTREAM_ADDR_nats" }}'
+NATS_USER='{{- with nomadVar "nomad/jobs" -}}{{ .NATS_USER }}{{- end -}}'
+NATS_PASSWORD='{{- with secret "kv2/data/services" -}}{{ .Data.data.NATS_PASSWORD }}{{- end -}}'
+
 {{ with nomadVar "nomad/jobs/media"}}
 DB_HOST='{{ .DB_HOST }}'
 DB_PORT='{{ .DB_PORT }}'
@@ -106,14 +114,6 @@ SERVICE_USER_CLIENT_SECRET='{{ .Data.data.SERVICE_USER_CLIENT_SECRET }}'
 
 COMMERCE_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_commerce-api" }}'
 PAYMENT_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_payment-api" }}'
-
-{{ with nomadVar "nomad/jobs" }}
-NATS_HOST='{{ .NATS_HOST }}'
-NATS_USER='{{ .NATS_USER }}'
-{{ end }}
-{{ with secret "kv2/data/services" }}
-NATS_PASSWORD='{{ .Data.data.NATS_PASSWORD }}'
-{{ end }}
 EOF
       }
 
