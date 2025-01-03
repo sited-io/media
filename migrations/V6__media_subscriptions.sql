@@ -7,5 +7,9 @@ CREATE TABLE media_subscriptions (
   subscription_status VARCHAR NOT NULL,
   payed_at TIMESTAMP WITH TIME ZONE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW() ON UPDATE NOW()
-)
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER update_shops_updated_at BEFORE UPDATE
+    ON media_subscriptions FOR EACH ROW EXECUTE PROCEDURE 
+    updated_at_now();

@@ -23,8 +23,8 @@ job "media" {
               local_bind_port = 4222
             }
             upstreams {
-              destination_name = "commerce-api"
-              local_bind_port  = 10000
+              destination_name = "postgres-sql"
+              local_bind_port  = 5432
             }
             upstreams {
               destination_name = "payment-api"
@@ -80,16 +80,11 @@ NATS_HOST='{{ env "NOMAD_UPSTREAM_ADDR_nats" }}'
 NATS_USER='{{- with nomadVar "nomad/jobs" -}}{{ .NATS_USER }}{{- end -}}'
 NATS_PASSWORD='{{- with secret "kv2/data/services" -}}{{ .Data.data.NATS_PASSWORD }}{{- end -}}'
 
-{{ with nomadVar "nomad/jobs/media"}}
-DB_HOST='{{ .DB_HOST }}'
-DB_PORT='{{ .DB_PORT }}'
-DB_DBNAME='{{ .DB_DBNAME }}'
-DB_USER='{{ .DB_USER }}'
-{{ end }}
-DB_ROOT_CERT='{{ env "NOMAD_SECRETS_DIR" }}/database_root_cert.crt'
-{{ with secret "kv2/data/services/media" }}
-DB_PASSWORD='{{ .Data.data.DB_PASSWORD }}'
-{{ end }}
+DB_HOST='{{ env "NOMAD_UPSTREAM_IP_postgres-sql" }}'
+DB_PORT='{{ env "NOMAD_UPSTREAM_PORT_postgres-sql" }}'
+DB_DBNAME='media'
+DB_USER='media_user'
+DB_PASSWORD='{{- with secret "database/static-creds/media_user" -}}{{ .Data.password }}{{- end -}}'
 
 {{ with nomadVar "nomad/jobs/" }}
 JWKS_URL='http://{{ .JWKS_HOST }}/oauth/v2/keys'
@@ -112,7 +107,6 @@ SERVICE_USER_CLIENT_ID='{{ .Data.data.SERVICE_USER_CLIENT_ID }}'
 SERVICE_USER_CLIENT_SECRET='{{ .Data.data.SERVICE_USER_CLIENT_SECRET }}'
 {{ end }}
 
-COMMERCE_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_commerce-api" }}'
 PAYMENT_SERVICE_URL='http://{{ env "NOMAD_UPSTREAM_ADDR_payment-api" }}'
 EOF
       }
