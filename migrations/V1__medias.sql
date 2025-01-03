@@ -1,10 +1,4 @@
-CREATE OR REPLACE FUNCTION updated_at_now()
-RETURNS TRIGGER AS $$
-BEGIN
-   NEW.updated_at = now(); 
-   RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- updated_at_now() was created in commerce
 
 CREATE TABLE medias (
   media_id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
